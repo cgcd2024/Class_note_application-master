@@ -4,4 +4,6 @@ class Pages {
   static const createNewTask = '/createNewTask';
   static const updateTask = '/updateNewTask';
   static const uploadVoice = '/uploadVoice';
+  static const createSummary = '/createSummary';
+  static const createQuiz = '/createQuiz';
 }

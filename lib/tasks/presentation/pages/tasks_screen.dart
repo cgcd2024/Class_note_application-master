@@ -10,7 +10,6 @@ import 'package:task_manager_app/tasks/presentation/pages/upload_voice_screen.da
 import 'package:task_manager_app/tasks/presentation/widget/task_item_view.dart';
 import 'package:task_manager_app/utils/color_palette.dart';
 import 'package:task_manager_app/utils/util.dart';
-
 import '../../../components/widgets.dart';
 import '../../../routes/pages.dart';
 import '../../../utils/font_sizes.dart';
