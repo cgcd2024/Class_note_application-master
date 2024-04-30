@@ -78,7 +78,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   }
 
   Future<String> convertSpeechToText(String filePath) async {
-    const apiKey = "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";
+    const apiKey = "myapikey";
     var url = Uri.https("api.openai.com", "/v1/audio/transcriptions");
     var request = http.MultipartRequest('POST', url);
     request.headers.addAll({"Authorization": "Bearer $apiKey"});
