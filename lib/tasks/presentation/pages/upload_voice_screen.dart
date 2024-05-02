@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
 import 'package:http/http.dart' as http;
 import '../../../routes/pages.dart';
+
 
 class UploadVoiceScreen extends StatefulWidget {
   final TaskModel taskModel;
@@ -78,7 +80,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   }
 
   Future<String> convertSpeechToText(String filePath) async {
-    const apiKey = "myapikey";
+    final apiKey = dotenv.env['API_KEY'];
     var url = Uri.https("api.openai.com", "/v1/audio/transcriptions");
     var request = http.MultipartRequest('POST', url);
     request.headers.addAll({"Authorization": "Bearer $apiKey"});
@@ -122,7 +124,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
           children: <Widget>[
             Text(
               'Task Title: $taskTitle',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             SizedBox(height: 20),
             ElevatedButton(
