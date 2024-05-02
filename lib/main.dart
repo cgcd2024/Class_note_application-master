@@ -8,11 +8,14 @@ import 'package:task_manager_app/tasks/data/local/data_sources/tasks_data_provid
 import 'package:task_manager_app/tasks/data/repository/task_repository.dart';
 import 'package:task_manager_app/tasks/presentation/bloc/tasks_bloc.dart';
 import 'package:task_manager_app/utils/color_palette.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Bloc.observer = BlocStateOberver();
   SharedPreferences preferences = await SharedPreferences.getInstance();
+  await dotenv.load(fileName: "assets/config/.env");
   runApp(MyApp(
     preferences: preferences,
   ));

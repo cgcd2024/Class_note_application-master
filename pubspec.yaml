@@ -35,6 +35,7 @@ dependencies:
   http: ^1.2.1
   flutter_sound: ^9.2.13
   permission_handler: ^11.3.1
+  flutter_dotenv: ^5.0.2
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -78,6 +79,7 @@ flutter:
     - assets/images/
     - assets/svgs/
     - assets/images/
+    - assets/config/.env
 
   fonts:
     - family: Sora
