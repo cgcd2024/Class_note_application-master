@@ -3,6 +3,7 @@ import '../../../routes/pages.dart';
 import '../../data/local/model/task_model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SummaryScreen extends StatefulWidget {
   final TaskModel taskModel; // TaskModel 객체를 필수 매개변수로 추가
@@ -18,7 +19,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
   var before = '강원도 삼척시 대이리 동굴 지대에 위치한 대금굴은 인근에 있는 환선굴, 관음굴과 비슷한 시기에 형성된 동굴로 동굴 발견까지 4년, 시설물 설치 3년, 총 7년의 준비 기간 끝에 일반에 개방하였다.동굴 내부에는 종유석, 석순, 석주 등 동굴 생성물이 잘 발달되어 있으며, 특히 지하에는 근원지를 알 수 없는 많은 양의 동굴수가 흘러 여러 개의 크고 작은 폭포와 동굴 호수가 형성되어 있는 것이 특징이다.현재 대금굴은 모노레일로만 접근이 가능, 최소 방문 하루 전에 온라인 예매를 해야 입장이 가능하다. 대금굴 예매 시간은 모노레일 출발시간이며, 도보 이동을 위해 반드시 30분 전까지 매표소에 도착해야 한다.'; // Replace with your text
 
   Future<String> summarizeText(String before) async {
-    final apiKey = '키'; // Replace with your actual API key
+    final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
     final endpoint = 'https://api.openai.com/v1/chat/completions';
 
     final response = await http.post(
