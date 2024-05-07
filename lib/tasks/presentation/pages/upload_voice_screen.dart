@@ -129,6 +129,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
             Text(
               'Task Title: $taskTitle',
               style: Theme.of(context).textTheme.titleLarge,
+              // init code => style: Theme.of(context).textTheme.headline6,
             ),
             SizedBox(height: 20),
             ElevatedButton(
