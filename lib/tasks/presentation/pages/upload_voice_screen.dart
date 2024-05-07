@@ -87,16 +87,19 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     request.fields['model'] = 'whisper-1';
     request.fields['language'] = 'ko';
     request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
     try {
       var response = await request.send();
       var newResponse = await http.Response.fromStream(response);
       if (newResponse.statusCode == 200) {
         var responseData = json.decode(utf8.decode(newResponse.bodyBytes));
         if (responseData.containsKey('text')) {
+          String transcribedText = responseData['text'];
           setState(() {
-            text = responseData['text'];
+            text = transcribedText;
+            widget.taskModel.transcribedTexts.add(transcribedText);  // TaskModel에 변환된 텍스트 추가
           });
-          return responseData['text'];
+          return transcribedText;
         } else {
           throw Exception('API response does not contain text.');
         }
@@ -109,6 +112,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       rethrow;
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
