@@ -16,7 +16,7 @@ class TaskModel {
     required this.stopDateTime,
     this.completed = false,
     this.transcribedTexts = const [], // 기본값으로 빈 리스트 설정
-    this.summaryTexts,
+    this.summaryTexts, // 기본값 null으로 설정
   });
 
   Map<String, dynamic> toJson() {
