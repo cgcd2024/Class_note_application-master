@@ -5,6 +5,7 @@ class TaskModel {
   DateTime? startDateTime;
   DateTime? stopDateTime;
   bool completed;
+  // TODO (재현) : transcribedTexts nullable 해도 되는지?
   List<String> transcribedTexts; // 변환된 텍스트 목록을 저장하는 리스트 추가
   List<String>? summaryTexts; // 요약된 텍스트 리스트
   List<String>? quizTexts;

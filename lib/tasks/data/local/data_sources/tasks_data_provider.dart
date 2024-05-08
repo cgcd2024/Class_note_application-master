@@ -147,20 +147,29 @@ class TaskDataProvider {
   }
 
   // 내가 만들려고 하는 stt-tts-stq 함수
-  Future<List<TaskModel>> processTasks(String keywords) async {
-    // var searchText = keywords.toLowerCase();
-    // List<TaskModel> matchedTasked = tasks;
-    // return matchedTasked.where((task) {
-    //   final titleMatches = task.title.toLowerCase().contains(searchText);
-    //   final descriptionMatches = task.description.toLowerCase().contains(searchText);
-    //   return titleMatches || descriptionMatches;
-    // }).toList();
-    List<TaskModel> temp=[];
-    return temp;
+  Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
+    // TODO text to summary 코드
+    taskModel.summaryTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
+      return await _summaryTasks(input: myString);
+    }).toList());
+
+    // TODO summary to quiz 코드
+    taskModel.quizTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
+      return await _quizTasks(input: myString);
+    }).toList());
+
+    // TODO tasks 업데이트 코드
+    tasks[tasks.indexWhere((element) => element.id == taskModel.id)] = taskModel;
+    final List<String> taskJsonList = tasks.map((task) => json.encode(task.toJson())).toList();
+    prefs!.setStringList(Constants.taskKey, taskJsonList);
+    return tasks;
+    // String temp= await _summaryTasks("input"); 잘못된 예시
+    return tasks;
   }
 
 
-  Future<String> summaryTasks({
+  // TODO 정민님 이 코드좀 완성시켜주세요
+  Future<String> _quizTasks({
     required String input
   }) async {
     final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
@@ -181,7 +190,7 @@ class TaskDataProvider {
           },
           {
             "role": "user",
-            "content": "다음 문장을 요약해주세요. $input" // 이 부분 chatgpt에 묻는 것처럼 수정
+            "content": "다음 문장을 요약해주세요. $input"
           }
         ]
         // 'max_tokens': 50, // Adjust the summary length as needed
@@ -200,4 +209,42 @@ class TaskDataProvider {
   }
 
 
+  Future<String> _summaryTasks({
+    required String input
+  }) async {
+    final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
+
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      },
+      body: jsonEncode({
+        'model':'gpt-3.5-turbo',
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a helpful assistant."
+          },
+          {
+            "role": "user",
+            "content": "다음 문장을 요약해주세요. $input"
+          }
+        ]
+        // 'max_tokens': 50, // Adjust the summary length as needed
+      }),
+    );
+    logger.i('openai response: '
+        '${utf8.decode(response.bodyBytes)}');
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      final summary = decoded['choices'][0]['message']['content'] as String;
+      return summary;
+    } else {
+      throw Exception('Failed to summarize text');
+    }
+  }
 }
