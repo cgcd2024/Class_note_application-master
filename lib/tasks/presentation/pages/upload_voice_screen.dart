@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
 import 'package:http/http.dart' as http;
 import '../../../routes/pages.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 
 class UploadVoiceScreen extends StatefulWidget {
@@ -29,14 +31,41 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   @override
   void initState() {
     super.initState();
-    _recorder = FlutterSoundRecorder();
-    initRecorder();
+    requestPermissions().then((_) {
+      _recorder = FlutterSoundRecorder();
+      initRecorder();
+    });
+  }
+
+  Future<String> convertAacToMp3(String inputPath) async {
+    final outputPath = inputPath.replaceAll('.aac', '.mp3');
+    final flutterFFmpeg = FlutterFFmpeg();
+
+    int result = await flutterFFmpeg.execute('-y -i "$inputPath" -codec:a libmp3lame -qscale:a 2 "$outputPath"');
+    if (result == 0) {
+      print('Conversion successful');
+      return outputPath;
+    } else {
+      throw Exception('Failed to convert file');
+    }
+  }
+
+  Future<void> requestPermissions() async {
+    var micStatus = await Permission.microphone.status;
+    if (!micStatus.isGranted) {
+      await Permission.microphone.request();
+    }
+
+    var storageStatus = await Permission.storage.status;
+    if (!storageStatus.isGranted) {
+      await Permission.storage.request();
+    }
   }
 
   Future<void> initRecorder() async {
     try {
       await _recorder!.openRecorder();
-      _isRecorderInitialized = true; // 녹음기가 성공적으로 초기화되었습니다.
+      _isRecorderInitialized = true;
       _recorder!.setSubscriptionDuration(const Duration(milliseconds: 500));
     } catch (e) {
       print('녹음기 초기화 중 오류 발생: $e');
@@ -44,22 +73,58 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     }
   }
 
+
   Future<void> startRecording() async {
-    if (!_isRecorderInitialized) {
-      print('녹음기가 아직 초기화되지 않았습니다. 녹음을 시작할 수 없습니다.');
-      return; // 초기화가 완료되지 않았으므로 녹음 시작을 하지 않습니다.
+    if (!_isRecorderInitialized || _recorder!.isRecording) {
+      print('Recorder not initialized or already recording.');
+      return;
     }
 
     try {
       Directory tempDir = await getTemporaryDirectory();
-      String filePath = '${tempDir.path}/flutter_sound_tmp.aac';
-      await _recorder!.startRecorder(toFile: filePath);
+      _recordedFilePath = '${tempDir.path}/flutter_sound_tmp.aac';
+      await _recorder!.startRecorder(toFile: _recordedFilePath);
       setState(() {
         _isRecording = true;
       });
     } catch (e) {
-      print('녹음 시작 중 오류 발생: $e');
-      // 필요하다면 여기에서 추가적인 예외 처리를 수행할 수 있습니다.
+      print('Recording start error: $e');
+      setState(() {
+        _isRecording = false;
+      });
+    }
+  }
+
+  Future<void> stopRecording() async {
+    if (!_recorder!.isRecording) {
+      print('No recording currently active.');
+      return;
+    }
+    try {
+      String? path = await _recorder!.stopRecorder();
+      if (path == null) {
+        print('Error: Recording path is null after stopping the recorder.');
+        return;
+      }
+      setState(() {
+        _isRecording = false;
+      });
+      print('Recording stopped. Original file saved at: $path');
+      try {
+        String mp3Path = await convertAacToMp3(path);
+        print('Conversion to MP3 successful. File saved at: $mp3Path');
+        _recordedFilePath = mp3Path;
+        try {
+          await convertSpeechToText(mp3Path);
+        } catch (e) {
+          print('Error converting speech to text: $e');
+        }
+      } catch (e) {
+        print('Error during AAC to MP3 conversion: $e');
+      }
+
+    } catch (e) {
+      print('Error stopping the recording: $e');
     }
   }
 
@@ -70,14 +135,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     super.dispose();
   }
 
-  Future<void> stopRecording() async {
-    String? path = await _recorder!.stopRecorder();
-    setState(() {
-      _isRecording = false;
-      _recordedFilePath = path;
-      convertSpeechToText(_recordedFilePath!);  // Automatically start conversion
-    });
-  }
 
   Future<String> convertSpeechToText(String filePath) async {
     final apiKey = dotenv.env['API_KEY'];
@@ -129,7 +186,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
             Text(
               'Task Title: $taskTitle',
               style: Theme.of(context).textTheme.titleLarge,
-              // init code => style: Theme.of(context).textTheme.headline6,
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -173,13 +229,23 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Converted Text: $text',
-                    style: TextStyle(fontSize: 18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Converted Texts:',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      ...widget.taskModel.transcribedTexts.map((transcribedText) => Text(
+                        transcribedText,
+                        style: TextStyle(fontSize: 16),
+                      )).toList(),
+                    ],
                   ),
                 ),
               ),
-            ),
+            )
+
           ],
         ),
       ),
