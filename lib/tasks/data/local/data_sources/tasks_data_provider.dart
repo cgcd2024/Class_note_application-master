@@ -148,6 +148,8 @@ class TaskDataProvider {
 
   // 내가 만들려고 하는 stt-tts-stq 함수
   Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
+    // TODO speech to text 코드
+
     // TODO text to summary 코드
     taskModel.summaryTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
       return await _summaryTasks(input: myString);
@@ -168,7 +170,7 @@ class TaskDataProvider {
   }
 
 
-  // TODO 정민님 이 코드좀 완성시켜주세요
+  // TODO 정민님 이 코드좀 완성시켜주세요. 퀴즈 만드는 메서드
   Future<String> _quizTasks({
     required String input
   }) async {
