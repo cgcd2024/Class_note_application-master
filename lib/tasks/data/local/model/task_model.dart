@@ -7,6 +7,7 @@ class TaskModel {
   bool completed;
   List<String> transcribedTexts; // 변환된 텍스트 목록을 저장하는 리스트 추가
   List<String>? summaryTexts; // 요약된 텍스트 리스트
+  List<String>? quizTexts;
 
   TaskModel({
     required this.id,
@@ -17,6 +18,7 @@ class TaskModel {
     this.completed = false,
     this.transcribedTexts = const [], // 기본값으로 빈 리스트 설정
     this.summaryTexts, // 기본값 null으로 설정
+    this.quizTexts,
   });
 
   Map<String, dynamic> toJson() {
@@ -28,22 +30,28 @@ class TaskModel {
       'startDateTime': startDateTime?.toIso8601String(),
       'stopDateTime': stopDateTime?.toIso8601String(),
       'transcribedTexts': transcribedTexts, // 리스트를 JSON 배열로 변환
-      'summaryTexts' : summaryTexts,
+      'summaryTexts': summaryTexts,
+      'quizTexts': quizTexts,
     };
   }
 
-
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     return TaskModel(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      completed: json['completed'],
-      startDateTime: DateTime.parse(json['startDateTime']),
-      stopDateTime: DateTime.parse(json['stopDateTime']),
-      transcribedTexts: json['transcribedTexts'] != null ? List<String>.from(json['transcribedTexts']) : [], // JSON 배열을 List<String>으로 변환
-      summaryTexts: json['summaryTexts'] != null ? List<String>.from(json['summaryTexts']) : []
-    );
+        id: json['id'],
+        title: json['title'],
+        description: json['description'],
+        completed: json['completed'],
+        startDateTime: DateTime.parse(json['startDateTime']),
+        stopDateTime: DateTime.parse(json['stopDateTime']),
+        transcribedTexts: json['transcribedTexts'] != null
+            ? List<String>.from(json['transcribedTexts'])
+            : [], // JSON 배열을 List<String>으로 변환
+        summaryTexts: json['summaryTexts'] != null
+            ? List<String>.from(json['summaryTexts'])
+            : [],
+        quizTexts: json['quizTexts'] != null
+            ? List<String>.from(json['quizTexts'])
+            : []);
   }
 
   @override
@@ -53,6 +61,7 @@ class TaskModel {
         'completed: $completed,'
         'transcribedTexts: $transcribedTexts'
         'summaryTexts: $summaryTexts'
+        'quizTexts: $quizTexts'
         '}';
   }
 }
