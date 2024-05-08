@@ -6,6 +6,7 @@ class TaskModel {
   DateTime? stopDateTime;
   bool completed;
   List<String> transcribedTexts; // 변환된 텍스트 목록을 저장하는 리스트 추가
+  List<String>? summaryTexts; // 요약된 텍스트 리스트
 
   TaskModel({
     required this.id,
@@ -15,6 +16,7 @@ class TaskModel {
     required this.stopDateTime,
     this.completed = false,
     this.transcribedTexts = const [], // 기본값으로 빈 리스트 설정
+    this.summaryTexts, // 기본값 null으로 설정
   });
 
   Map<String, dynamic> toJson() {
@@ -26,6 +28,7 @@ class TaskModel {
       'startDateTime': startDateTime?.toIso8601String(),
       'stopDateTime': stopDateTime?.toIso8601String(),
       'transcribedTexts': transcribedTexts, // 리스트를 JSON 배열로 변환
+      'summaryTexts' : summaryTexts,
     };
   }
 
@@ -39,6 +42,7 @@ class TaskModel {
       startDateTime: DateTime.parse(json['startDateTime']),
       stopDateTime: DateTime.parse(json['stopDateTime']),
       transcribedTexts: json['transcribedTexts'] != null ? List<String>.from(json['transcribedTexts']) : [], // JSON 배열을 List<String>으로 변환
+      summaryTexts: json['summaryTexts'] != null ? List<String>.from(json['summaryTexts']) : []
     );
   }
 
@@ -46,6 +50,9 @@ class TaskModel {
   String toString() {
     return 'TaskModel{id: $id, title: $title, description: $description, '
         'startDateTime: $startDateTime, stopDateTime: $stopDateTime, '
-        'completed: $completed, transcribedTexts: $transcribedTexts}';
+        'completed: $completed,'
+        'transcribedTexts: $transcribedTexts'
+        'summaryTexts: $summaryTexts'
+        '}';
   }
 }

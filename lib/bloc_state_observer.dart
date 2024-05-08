@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// 그냥 상태 변경되는거 알려고 짠 코드같음....
 class BlocStateOberver extends BlocObserver{
   @override
   void onCreate(BlocBase bloc) {
