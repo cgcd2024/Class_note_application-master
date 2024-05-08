@@ -16,13 +16,16 @@ class TaskDataProvider {
 
   TaskDataProvider(this.prefs);
 
+  // 로컬에 있는 task 데이터를 불러와서 taskmodel형 list로 변환
   Future<List<TaskModel>> getTasks() async {
     try {
       final List<String>? savedTasks = prefs!.getStringList(Constants.taskKey);
       if (savedTasks != null) {
+        // json으로 List<taskModel> 만듬
         tasks = savedTasks
             .map((taskJson) => TaskModel.fromJson(json.decode(taskJson)))
             .toList();
+        // 완료된 task가 뒤로 가게 정렬
         tasks.sort((a, b) {
           if (a.completed == b.completed) {
             return 0;
@@ -39,6 +42,7 @@ class TaskDataProvider {
     }
   }
 
+  // List<taskModel> 정렬 함수, 0: 날짜순, 1: 완료task가 앞에 가게끔 정렬, 2: 완료 task가 뒤로 가게끔 정렬
   Future<List<TaskModel>> sortTasks(int sortOption) async {
     switch (sortOption) {
       case 0:
@@ -81,7 +85,9 @@ class TaskDataProvider {
 
   Future<void> createTask(TaskModel taskModel) async {
     try {
+      //taskModel을 받아서 tasks에 추가
       tasks.add(taskModel);
+      //요건 main.dart에서 언급한 로컬 저장소에 변경된 tasks를 넣음
       final List<String> taskJsonList =
           tasks.map((task) => json.encode(task.toJson())).toList();
       await prefs!.setStringList(Constants.taskKey, taskJsonList);
@@ -92,8 +98,10 @@ class TaskDataProvider {
 
   Future<List<TaskModel>> updateTask(TaskModel taskModel) async {
     try {
+      // 업데이트하는 요소(taskModel)과 기존의 요소(element)를 id가 같은것을 찾아서 바꿔치기
       tasks[tasks.indexWhere((element) => element.id == taskModel.id)] =
           taskModel;
+      // 다시 getTasks에서 했던 것처럼 정렬
       tasks.sort((a, b) {
         if (a.completed == b.completed) {
           return 0;
@@ -103,6 +111,7 @@ class TaskDataProvider {
           return -1;
         }
       });
+      // 애도 로컬에 다시 저장
       final List<String> taskJsonList = tasks.map((task) =>
           json.encode(task.toJson())).toList();
       prefs!.setStringList(Constants.taskKey, taskJsonList);
@@ -112,6 +121,7 @@ class TaskDataProvider {
     }
   }
 
+  // 위에꺼랑 같음
   Future<List<TaskModel>> deleteTask(TaskModel taskModel) async {
     try {
       tasks.remove(taskModel);
@@ -126,13 +136,29 @@ class TaskDataProvider {
 
   Future<List<TaskModel>> searchTasks(String keywords) async {
     var searchText = keywords.toLowerCase();
+    // tasks 복제
     List<TaskModel> matchedTasked = tasks;
+    // title 혹은 desc에 keyword가 포함되는것들만 반환
     return matchedTasked.where((task) {
       final titleMatches = task.title.toLowerCase().contains(searchText);
       final descriptionMatches = task.description.toLowerCase().contains(searchText);
       return titleMatches || descriptionMatches;
     }).toList();
   }
+
+  // 내가 만들려고 하는 stt-tts-stq 함수
+  Future<List<TaskModel>> processTasks(String keywords) async {
+    // var searchText = keywords.toLowerCase();
+    // List<TaskModel> matchedTasked = tasks;
+    // return matchedTasked.where((task) {
+    //   final titleMatches = task.title.toLowerCase().contains(searchText);
+    //   final descriptionMatches = task.description.toLowerCase().contains(searchText);
+    //   return titleMatches || descriptionMatches;
+    // }).toList();
+    List<TaskModel> temp=[];
+    return temp;
+  }
+
 
   Future<String> summaryTasks({
     required String input
@@ -172,4 +198,6 @@ class TaskDataProvider {
       throw Exception('Failed to summarize text');
     }
   }
+
+
 }

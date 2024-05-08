@@ -12,10 +12,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); // 앱의 여러가지 기능을 수행하기 위해 초기화해야 함
   Bloc.observer = BlocStateOberver();
-  SharedPreferences preferences = await SharedPreferences.getInstance();
-  await dotenv.load(fileName: "assets/config/.env");
+  final SharedPreferences preferences = await SharedPreferences.getInstance(); // 기기 내의 파일 불러오기
+  // original code => SharedPreferences preferences = await SharedPreferences.getInstance();
+  await dotenv.load(fileName: "assets/config/.env"); // api key 가져오기
   runApp(MyApp(
     preferences: preferences,
   ));
@@ -32,7 +33,8 @@ class MyApp extends StatelessWidget {
         create: (context) =>
             TaskRepository(taskDataProvider: TaskDataProvider(preferences)),
         child: BlocProvider(
-            create: (context) => TasksBloc(context.read<TaskRepository>()),
+            create: (context) =>
+                TasksBloc(context.read<TaskRepository>()),
             child: MaterialApp(
               title: 'appname',
               debugShowCheckedModeBanner: false,
