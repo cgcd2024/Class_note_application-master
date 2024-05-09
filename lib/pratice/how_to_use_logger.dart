@@ -10,6 +10,7 @@ import 'package:logger/logger.dart';
 
 var logger = Logger();
 
+// 실행해서 logger 디자인 보기
 void main() {
   demo();
 }
