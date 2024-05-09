@@ -146,10 +146,9 @@ class TaskDataProvider {
     }).toList();
   }
 
-  // 내가 만들려고 하는 stt-tts-stq 함수
+  // TODO 이 메소드 호출 전에 STT가 완료되어야 함,
+  // 왜냐하면 STT가 완료되지 않고 이 메소드가 실행되었을 경우 taskModel.transcribedTexts값이 null일 수 있기 때문
   Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
-    // TODO speech to text 코드
-
     // TODO text to summary 코드
     taskModel.summaryTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
       return await _summaryTasks(input: myString);
@@ -164,8 +163,6 @@ class TaskDataProvider {
     tasks[tasks.indexWhere((element) => element.id == taskModel.id)] = taskModel;
     final List<String> taskJsonList = tasks.map((task) => json.encode(task.toJson())).toList();
     prefs!.setStringList(Constants.taskKey, taskJsonList);
-    return tasks;
-    // String temp= await _summaryTasks("input"); 잘못된 예시
     return tasks;
   }
 
