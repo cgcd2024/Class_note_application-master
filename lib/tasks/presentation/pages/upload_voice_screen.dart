@@ -18,7 +18,7 @@ class UploadVoiceScreen extends StatefulWidget {
   const UploadVoiceScreen({Key? key, required this.taskModel}) : super(key: key);
 
   @override
-  _UploadVoiceScreenState createState() => _UploadVoiceScreenState();
+  State<UploadVoiceScreen> createState() => _UploadVoiceScreenState();
 }
 
 class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
@@ -43,7 +43,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
 
     int result = await flutterFFmpeg.execute('-y -i "$inputPath" -codec:a libmp3lame -qscale:a 2 "$outputPath"');
     if (result == 0) {
-      print('Conversion successful');
+      logger.i('Conversion successful');
       return outputPath;
     } else {
       throw Exception('Failed to convert file');
@@ -68,7 +68,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       _isRecorderInitialized = true;
       _recorder!.setSubscriptionDuration(const Duration(milliseconds: 500));
     } catch (e) {
-      print('녹음기 초기화 중 오류 발생: $e');
+      logger.e('녹음기 초기화 중 오류 발생: $e');
       _isRecorderInitialized = false;
     }
   }
@@ -76,7 +76,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
 
   Future<void> startRecording() async {
     if (!_isRecorderInitialized || _recorder!.isRecording) {
-      print('Recorder not initialized or already recording.');
+      logger.w('Recorder not initialized or already recording.');
       return;
     }
 
@@ -88,7 +88,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         _isRecording = true;
       });
     } catch (e) {
-      print('Recording start error: $e');
+      logger.e('Recording start error: $e');
       setState(() {
         _isRecording = false;
       });
@@ -97,34 +97,34 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
 
   Future<void> stopRecording() async {
     if (!_recorder!.isRecording) {
-      print('No recording currently active.');
+      logger.w('No recording currently active.');
       return;
     }
     try {
       String? path = await _recorder!.stopRecorder();
       if (path == null) {
-        print('Error: Recording path is null after stopping the recorder.');
+        logger.e('Error: Recording path is null after stopping the recorder.');
         return;
       }
       setState(() {
         _isRecording = false;
       });
-      print('Recording stopped. Original file saved at: $path');
+      logger.i('Recording stopped. Original file saved at: $path');
       try {
         String mp3Path = await convertAacToMp3(path);
-        print('Conversion to MP3 successful. File saved at: $mp3Path');
+        logger.i('Conversion to MP3 successful. File saved at: $mp3Path');
         _recordedFilePath = mp3Path;
         try {
           await convertSpeechToText(mp3Path);
         } catch (e) {
-          print('Error converting speech to text: $e');
+          logger.e('Error converting speech to text: $e');
         }
       } catch (e) {
-        print('Error during AAC to MP3 conversion: $e');
+        logger.e('Error during AAC to MP3 conversion: $e');
       }
 
     } catch (e) {
-      print('Error stopping the recording: $e');
+      logger.e('Error stopping the recording: $e');
     }
   }
 
@@ -161,11 +161,11 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
           throw Exception('API response does not contain text.');
         }
       } else {
-        print('API call failed with status code: ${newResponse.statusCode}');
+        logger.e('API call failed with status code: ${newResponse.statusCode}');
         throw Exception('API call failed. Status code: ${newResponse.statusCode}');
       }
     } catch (e) {
-      print('Exception during API call: $e');
+      logger.e('Exception during API call: $e');
       rethrow;
     }
   }
@@ -177,7 +177,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('앱 이름'),
+        title: const Text('앱 이름'),
       ),
       body: Center(
         child: Column(
@@ -187,14 +187,14 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
               'Task Title: $taskTitle',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _isRecording ? stopRecording : startRecording,
               style: ElevatedButton.styleFrom(
-                shape: CircleBorder(),
+                shape: const CircleBorder(),
                 backgroundColor: _isRecording ? Colors.red : Colors.white,
-                minimumSize: Size(200, 200),
-                padding: EdgeInsets.all(20),
+                minimumSize: const Size(200, 200),
+                padding: const EdgeInsets.all(20),
               ),
               child: Icon(
                 _isRecording ? Icons.stop : Icons.mic,
@@ -202,9 +202,9 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                 color: Colors.black,
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text('Recording Status: ${_isRecording ? "Recording..." : "Stopped"}'),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -216,15 +216,15 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                       text = convertedText;
                     });
                   } catch (e) {
-                    print('음성을 텍스트로 변환하는 중 오류가 발생했습니다: $e');
+                    logger.e('음성을 텍스트로 변환하는 중 오류가 발생했습니다: $e');
                   }
                 } else {
-                  print('파일을 선택하지 않았습니다.');
+                  logger.e('파일을 선택하지 않았습니다.');
                 }
               },
-              child: Text('Upload'),
+              child: const Text('Upload'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -232,13 +232,13 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
+                      const Text(
                         'Converted Texts:',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       ...widget.taskModel.transcribedTexts.map((transcribedText) => Text(
                         transcribedText,
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                       )).toList(),
                     ],
                   ),

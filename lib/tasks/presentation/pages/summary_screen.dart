@@ -12,7 +12,7 @@ class SummaryScreen extends StatefulWidget {
   const SummaryScreen({Key? key, required this.taskModel}) : super(key: key);
 
   @override
-  _SummaryScreenState createState() => _SummaryScreenState();
+  State<SummaryScreen> createState() => _SummaryScreenState();
 }
 
 class _SummaryScreenState extends State<SummaryScreen> {
@@ -20,7 +20,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
   Future<String> summarizeText(String before) async {
     final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
-    final endpoint = 'https://api.openai.com/v1/chat/completions';
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
 
     final response = await http.post(
       Uri.parse(endpoint),
@@ -43,7 +43,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
         // 'max_tokens': 50, // Adjust the summary length as needed
       }),
     );
-    print(utf8.decode(response.bodyBytes));
+    logger.v(utf8.decode(response.bodyBytes));
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -62,10 +62,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Summary Screen'),
+        title: const Text('Summary Screen'),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pushReplacementNamed(context, Pages.uploadVoice, arguments: widget.taskModel),
         ),
       ),
@@ -74,9 +74,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text("Task Title: ${taskModel.title}"), // TaskModel의 title을 화면에 표시
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text("Task Description: ${taskModel.description}"), // TaskModel의 description을 화면에 표시
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
                 onPressed: () async{
                   String sum=await summarizeText(before);
@@ -84,8 +84,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     before=sum;
                   });
                 },
-                child: Text("summarizing")),
-            SizedBox(height: 10),
+                child: const Text("summarizing")),
+            const SizedBox(height: 10),
             Text(before),
           ],
         ),

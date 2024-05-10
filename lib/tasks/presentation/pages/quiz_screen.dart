@@ -9,7 +9,7 @@ class QuizScreen extends StatefulWidget {
   const QuizScreen({Key? key, required this.taskModel}) : super(key: key);
 
   @override
-  _QuizScreenState createState() => _QuizScreenState();
+  State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
@@ -20,10 +20,10 @@ class _QuizScreenState extends State<QuizScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('QUIZ Screen'),
+        title: const Text('QUIZ Screen'),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pushReplacementNamed(context, Pages.uploadVoice, arguments: widget.taskModel),
         ),
       ),
@@ -32,7 +32,7 @@ class _QuizScreenState extends State<QuizScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text("Task Title: ${taskModel.title}"), // TaskModel의 title을 화면에 표시
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text("Task Description: ${taskModel.description}"), // TaskModel의 description을 화면에 표시
           ],
         ),
