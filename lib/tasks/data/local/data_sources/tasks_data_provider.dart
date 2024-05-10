@@ -171,7 +171,6 @@ class TaskDataProvider {
     return tasks;
   }
 
-  // TODO 정민님 이 코드좀 완성시켜주세요. 퀴즈 만드는 메서드
   Future<String> _quizTasks({required String input}) async {
     final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
     const endpoint = 'https://api.openai.com/v1/chat/completions';
