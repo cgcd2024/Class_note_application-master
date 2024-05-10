@@ -4,11 +4,8 @@ put following command in terminal to install logger lib
 => dart pub add logger
 now we can use logger!
 */
-//import logger lib
-import 'package:logger/logger.dart';
 
-
-var logger = Logger();
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // 실행해서 logger 디자인 보기
 void main() {
@@ -37,6 +34,7 @@ void demo() {
 }
 /*
 그래서 사용법은 다음과 같다.
+import 'package:flutter_dotenv/flutter_dotenv.dart';를 해주자(api key를 사용하기 위해 임포트가 되있을 것이다)
 logger.[로거의 종류]([메인메세지],[위에 나오는 메세지])는 logger의 형식이므로
 우리는 [메인메시지]에는 로거를 통해 알려주려고 하는 데이터를 넣고
 [위에 나오는 메세지]에는 메제지의 종류 혹은 설명을 넣도록 하자

@@ -4,11 +4,10 @@ import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
 import 'package:task_manager_app/utils/exception_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:logger/logger.dart';
+
 
 import '../../../../utils/constants.dart';
 
-var logger = Logger();
 
 class TaskDataProvider {
   List<TaskModel> tasks = [];
@@ -156,13 +155,13 @@ class TaskDataProvider {
       return await _summaryTasks(input: myString);
     }).toList());
 
-    // TODO summary to quiz 코드
+    // summary to quiz 코드
     taskModel.quizTexts =
         await Future.wait(taskModel.transcribedTexts.map((myString) async {
       return await _quizTasks(input: myString);
     }).toList());
 
-    // TODO tasks 업데이트 코드
+    // tasks 업데이트 코드
     tasks[tasks.indexWhere((element) => element.id == taskModel.id)] =
         taskModel;
     final List<String> taskJsonList =
