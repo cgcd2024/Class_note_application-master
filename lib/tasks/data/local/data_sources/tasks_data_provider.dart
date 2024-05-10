@@ -37,7 +37,7 @@ class TaskDataProvider {
         });
       }
       return tasks;
-    }catch(e){
+    } catch (e) {
       throw Exception(handleException(e));
     }
   }
@@ -68,7 +68,7 @@ class TaskDataProvider {
         });
         break;
       case 2:
-      //sort by pending tasks
+        //sort by pending tasks
         tasks.sort((a, b) {
           if (a.completed == b.completed) {
             return 0;
@@ -112,8 +112,8 @@ class TaskDataProvider {
         }
       });
       // 애도 로컬에 다시 저장
-      final List<String> taskJsonList = tasks.map((task) =>
-          json.encode(task.toJson())).toList();
+      final List<String> taskJsonList =
+          tasks.map((task) => json.encode(task.toJson())).toList();
       prefs!.setStringList(Constants.taskKey, taskJsonList);
       return tasks;
     } catch (exception) {
@@ -125,8 +125,8 @@ class TaskDataProvider {
   Future<List<TaskModel>> deleteTask(TaskModel taskModel) async {
     try {
       tasks.remove(taskModel);
-      final List<String> taskJsonList = tasks.map((task) =>
-          json.encode(task.toJson())).toList();
+      final List<String> taskJsonList =
+          tasks.map((task) => json.encode(task.toJson())).toList();
       prefs!.setStringList(Constants.taskKey, taskJsonList);
       return tasks;
     } catch (exception) {
@@ -141,7 +141,8 @@ class TaskDataProvider {
     // title 혹은 desc에 keyword가 포함되는것들만 반환
     return matchedTasked.where((task) {
       final titleMatches = task.title.toLowerCase().contains(searchText);
-      final descriptionMatches = task.description.toLowerCase().contains(searchText);
+      final descriptionMatches =
+          task.description.toLowerCase().contains(searchText);
       return titleMatches || descriptionMatches;
     }).toList();
   }
@@ -150,27 +151,28 @@ class TaskDataProvider {
   // 왜냐하면 STT가 완료되지 않고 이 메소드가 실행되었을 경우 taskModel.transcribedTexts값이 null일 수 있기 때문
   Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
     // TODO text to summary 코드
-    taskModel.summaryTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
+    taskModel.summaryTexts =
+        await Future.wait(taskModel.transcribedTexts.map((myString) async {
       return await _summaryTasks(input: myString);
     }).toList());
 
     // TODO summary to quiz 코드
-    taskModel.quizTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
+    taskModel.quizTexts =
+        await Future.wait(taskModel.transcribedTexts.map((myString) async {
       return await _quizTasks(input: myString);
     }).toList());
 
     // TODO tasks 업데이트 코드
-    tasks[tasks.indexWhere((element) => element.id == taskModel.id)] = taskModel;
-    final List<String> taskJsonList = tasks.map((task) => json.encode(task.toJson())).toList();
+    tasks[tasks.indexWhere((element) => element.id == taskModel.id)] =
+        taskModel;
+    final List<String> taskJsonList =
+        tasks.map((task) => json.encode(task.toJson())).toList();
     prefs!.setStringList(Constants.taskKey, taskJsonList);
     return tasks;
   }
 
-
   // TODO 정민님 이 코드좀 완성시켜주세요. 퀴즈 만드는 메서드
-  Future<String> _quizTasks({
-    required String input
-  }) async {
+  Future<String> _quizTasks({required String input}) async {
     final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
     const endpoint = 'https://api.openai.com/v1/chat/completions';
 
@@ -181,18 +183,17 @@ class TaskDataProvider {
         'Authorization': 'Bearer $apiKey',
       },
       body: jsonEncode({
-        'model':'gpt-3.5-turbo',
+        'model': 'gpt-3.5-turbo',
         "messages": [
           {
             "role": "system",
-            "content": "You are a helpful assistant."
+            "content":
+                "너는 user가 보낸 글의 내용을 기반으로 주관식 문제를 만들어내는 봇이야. 문제를 만들고 해답을 알려 줘."
           },
-          {
-            "role": "user",
-            "content": "다음 문장을 요약해주세요. $input"
-          }
-        ]
-        // 'max_tokens': 50, // Adjust the summary length as needed
+          {"role": "assistant", "content": "문제 : \n해답 : \n"},
+          {"role": "user", "content": input}
+        ],
+        'max_tokens': 200,
       }),
     );
     logger.i('openai response: '
@@ -207,10 +208,7 @@ class TaskDataProvider {
     }
   }
 
-
-  Future<String> _summaryTasks({
-    required String input
-  }) async {
+  Future<String> _summaryTasks({required String input}) async {
     final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
     const endpoint = 'https://api.openai.com/v1/chat/completions';
 
@@ -221,16 +219,10 @@ class TaskDataProvider {
         'Authorization': 'Bearer $apiKey',
       },
       body: jsonEncode({
-        'model':'gpt-3.5-turbo',
+        'model': 'gpt-3.5-turbo',
         "messages": [
-          {
-            "role": "system",
-            "content": "You are a helpful assistant."
-          },
-          {
-            "role": "user",
-            "content": "다음 문장을 요약해주세요. $input"
-          }
+          {"role": "system", "content": "You are a helpful assistant."},
+          {"role": "user", "content": "다음 문장을 요약해주세요. $input"}
         ]
         // 'max_tokens': 50, // Adjust the summary length as needed
       }),
