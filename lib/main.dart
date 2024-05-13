@@ -10,8 +10,8 @@ import 'package:task_manager_app/tasks/presentation/bloc/tasks_bloc.dart';
 import 'package:task_manager_app/utils/color_palette.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
 Future<void> main() async {
+  // exLogger().demo(); // logger 예시
   WidgetsFlutterBinding.ensureInitialized(); // 앱의 여러가지 기능을 수행하기 위해 초기화해야 함
   Bloc.observer = BlocStateOberver();
   final SharedPreferences preferences = await SharedPreferences.getInstance(); // 기기 내의 파일 불러오기

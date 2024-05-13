@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../routes/pages.dart';
 import '../../data/local/model/task_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-import '../bloc/tasks_bloc.dart';
 
 class SummaryScreen extends StatefulWidget {
   final TaskModel taskModel; // TaskModel 객체를 필수 매개변수로 추가
@@ -78,42 +75,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
           children: <Widget>[
             Text("Task Title: ${taskModel.title}"), // TaskModel의 title을 화면에 표시
             SizedBox(height: 10),
-            Text("Task Description: ${taskModel.description}"),// TaskModel의 description을 화면에 표시
-            //processTask가 완료되었을때 화면처리
-            BlocConsumer<TasksBloc, TasksState>(
-              listener: (context, state) {
-                if (state is VoiceFileUploadSuccess) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('File uploaded successfully!'),
-                    ),
-                  );
-                }
-              },
-              builder: (context, state) {
-                //TODO summary를 출력하는건 VoiceFileUploadSuccess된 순간만 유지됨 (해결하는법?)
-                if (state is VoiceFileUploadSuccess) { // VoiceFileUploadSuccess 이벤트 발생 후
-                  return Expanded(
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              '요약본 : ',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            Text("${state.processedTasks.first.summaryTexts}"),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return Text("요약 생성전"); // 다른 상태에 대한 빈 위젯 반환
-              },
-            ),
+            Text("Task Description: ${taskModel.description}"), // TaskModel의 description을 화면에 표시
             SizedBox(height: 10),
             ElevatedButton(
                 onPressed: () async{

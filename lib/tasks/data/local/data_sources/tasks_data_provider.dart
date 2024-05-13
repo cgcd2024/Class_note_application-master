@@ -146,7 +146,7 @@ class TaskDataProvider {
     }).toList();
   }
 
-  // TODO 이 메소드 호출 전에 STT가 완료되어야 함, >> bloc에서 처리
+  // TODO 이 메소드 호출 전에 STT가 완료되어야 함,
   // 왜냐하면 STT가 완료되지 않고 이 메소드가 실행되었을 경우 taskModel.transcribedTexts값이 null일 수 있기 때문
   Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
     // TODO text to summary 코드
@@ -155,9 +155,9 @@ class TaskDataProvider {
     }).toList());
 
     // TODO summary to quiz 코드
-    // taskModel.quizTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
-    //   return await _quizTasks(input: myString);
-    // }).toList());
+    taskModel.quizTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
+      return await _quizTasks(input: myString);
+    }).toList());
 
     // TODO tasks 업데이트 코드
     tasks[tasks.indexWhere((element) => element.id == taskModel.id)] = taskModel;
@@ -237,6 +237,7 @@ class TaskDataProvider {
     );
     logger.i('openai response: '
         '${utf8.decode(response.bodyBytes)}');
+
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       final summary = decoded['choices'][0]['message']['content'] as String;
