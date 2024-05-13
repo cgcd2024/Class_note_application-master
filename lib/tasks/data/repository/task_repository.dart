@@ -6,6 +6,11 @@ class TaskRepository{
 
   TaskRepository({required this.taskDataProvider});
 
+  //processtask 선언
+  Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
+    return await taskDataProvider.processTasks(taskModel);
+  }
+
   Future<List<TaskModel>> getTasks() async {
     return await taskDataProvider.getTasks();
   }

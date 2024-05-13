@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -10,6 +11,8 @@ import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
 import 'package:http/http.dart' as http;
 import '../../../routes/pages.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../bloc/tasks_bloc.dart';
 
 
 class UploadVoiceScreen extends StatefulWidget {
@@ -22,7 +25,7 @@ class UploadVoiceScreen extends StatefulWidget {
 }
 
 class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
-  var text = "SPEECH TO TEXT";
+  var text = "";
   FlutterSoundRecorder? _recorder;
   bool _isRecording = false;
   bool _isRecorderInitialized = false;
@@ -31,6 +34,8 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   @override
   void initState() {
     super.initState();
+    //이벤트처리를 위해 선언
+    context.read<TasksBloc>().add(FetchTaskEvent());
     requestPermissions().then((_) {
       _recorder = FlutterSoundRecorder();
       initRecorder();
@@ -115,14 +120,24 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         print('Conversion to MP3 successful. File saved at: $mp3Path');
         _recordedFilePath = mp3Path;
         try {
-          await convertSpeechToText(mp3Path);
+          String transcribedText = await convertSpeechToText(mp3Path);
+          print('Text conversion successful: $transcribedText');
+          List<String> updatedTranscribedTexts = List.from(widget.taskModel.transcribedTexts)
+            ..add(transcribedText);
+          TaskModel updatedTaskModel = widget.taskModel.copyWith(
+              transcribedTexts: updatedTranscribedTexts
+          );
+          context.read<TasksBloc>().add(UpdateTaskEvent(taskModel: updatedTaskModel));
+          context.read<TasksBloc>().add(UploadVoiceFile(taskModel: updatedTaskModel));
+          setState(() {
+            text = transcribedText;
+          });
         } catch (e) {
           print('Error converting speech to text: $e');
         }
       } catch (e) {
         print('Error during AAC to MP3 conversion: $e');
       }
-
     } catch (e) {
       print('Error stopping the recording: $e');
     }
@@ -144,7 +159,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     request.fields['model'] = 'whisper-1';
     request.fields['language'] = 'ko';
     request.files.add(await http.MultipartFile.fromPath('file', filePath));
-
     try {
       var response = await request.send();
       var newResponse = await http.Response.fromStream(response);
@@ -152,10 +166,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         var responseData = json.decode(utf8.decode(newResponse.bodyBytes));
         if (responseData.containsKey('text')) {
           String transcribedText = responseData['text'];
-          setState(() {
-            text = transcribedText;
-            widget.taskModel.transcribedTexts.add(transcribedText);  // TaskModel에 변환된 텍스트 추가
-          });
           return transcribedText;
         } else {
           throw Exception('API response does not contain text.');
@@ -173,7 +183,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String taskTitle = widget.taskModel.title;
+    final taskModel = widget.taskModel;
 
     return Scaffold(
       appBar: AppBar(
@@ -183,10 +193,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'Task Title: $taskTitle',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text("Task Title: ${taskModel.title}"),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _isRecording ? stopRecording : startRecording,
@@ -211,10 +218,11 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                 if (result != null && result.files.isNotEmpty) {
                   String filePath = result.files.single.path!;
                   try {
-                    String convertedText = await convertSpeechToText(filePath);
-                    setState(() {
-                      text = convertedText;
-                    });
+                    String transcribedText = await convertSpeechToText(filePath);
+                    //ㄴ
+                    List<String> updatedTranscribedTexts = List.from(widget.taskModel.transcribedTexts)..add(transcribedText);
+                    TaskModel updatedTaskModel = widget.taskModel.copyWith(transcribedTexts: updatedTranscribedTexts);
+                    context.read<TasksBloc>().add(UploadVoiceFile(taskModel: updatedTaskModel));
                   } catch (e) {
                     print('음성을 텍스트로 변환하는 중 오류가 발생했습니다: $e');
                   }
@@ -225,27 +233,41 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
               child: Text('Upload'),
             ),
             SizedBox(height: 20),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        'Converted Texts:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      ...widget.taskModel.transcribedTexts.map((transcribedText) => Text(
-                        transcribedText,
-                        style: TextStyle(fontSize: 16),
-                      )).toList(),
-                    ],
-                  ),
-                ),
-              ),
-            )
 
+            //BLOC 이벤트가 완료되면 UI 처리코드
+            BlocConsumer<TasksBloc, TasksState>(
+              listener: (context, state) {
+                if (state is VoiceFileUploadSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('File uploaded successfully!'),
+                    ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is VoiceFileUploadSuccess) {
+                  return Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              'Converted Texts:',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            Text("${state.processedTasks.first.transcribedTexts}"),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return Text("번역 생성이전");
+              },
+            )
           ],
         ),
       ),

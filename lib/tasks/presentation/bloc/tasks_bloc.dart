@@ -18,6 +18,18 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     on<DeleteTaskEvent>(_deleteTask);
     on<SortTaskEvent>(_sortTasks);
     on<SearchTaskEvent>(_searchTasks);
+    on<UploadVoiceFile>(_uploadVoiceFile);
+  }
+
+  //_uploadVoiceFile이 되면, processtask를 싫행함
+  _uploadVoiceFile(UploadVoiceFile event, Emitter<TasksState> emit) async {
+    emit(TasksLoading());
+    try {
+      List<TaskModel> processedTasks = await taskRepository.processTasks(event.taskModel);
+      emit(VoiceFileUploadSuccess(processedTasks: processedTasks));
+    } catch (exception) {
+      emit(VoiceFileUploadFailure(exception.toString()));
+    }
   }
 
   _addNewTask(AddNewTaskEvent event, Emitter<TasksState> emit) async {

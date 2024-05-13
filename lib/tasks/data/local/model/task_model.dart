@@ -22,6 +22,28 @@ class TaskModel {
     this.quizTexts,
   });
 
+  TaskModel copyWith({
+    String? id,
+    String? title,
+    String? description,
+    DateTime? startDateTime,
+    DateTime? stopDateTime,
+    bool? completed,
+    List<String>? transcribedTexts,
+    List<String>? summaryTexts,
+  }) {
+    return TaskModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      startDateTime: startDateTime ?? this.startDateTime,
+      stopDateTime: stopDateTime ?? this.stopDateTime,
+      completed: completed ?? this.completed,
+      transcribedTexts: transcribedTexts ?? this.transcribedTexts,
+      summaryTexts: summaryTexts ?? this.summaryTexts,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
