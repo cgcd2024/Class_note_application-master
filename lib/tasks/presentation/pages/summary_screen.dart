@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../routes/pages.dart';
+import '../../data/local/data_sources/tasks_data_provider.dart';
 import '../../data/local/model/task_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import '../bloc/tasks_bloc.dart';
 
 class SummaryScreen extends StatefulWidget {
   final TaskModel taskModel; // TaskModel 객체를 필수 매개변수로 추가
@@ -12,7 +16,7 @@ class SummaryScreen extends StatefulWidget {
   const SummaryScreen({Key? key, required this.taskModel}) : super(key: key);
 
   @override
-  _SummaryScreenState createState() => _SummaryScreenState();
+  State<SummaryScreen> createState() => _SummaryScreenState();
 }
 
 class _SummaryScreenState extends State<SummaryScreen> {
@@ -20,7 +24,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
   Future<String> summarizeText(String before) async {
     final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
-    final endpoint = 'https://api.openai.com/v1/chat/completions';
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
 
     final response = await http.post(
       Uri.parse(endpoint),
@@ -43,8 +47,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
         // 'max_tokens': 50, // Adjust the summary length as needed
       }),
     );
-    print(utf8.decode(response.bodyBytes));
-
+    logger.v(utf8.decode(response.bodyBytes));
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       final summary = decoded['choices'][0]['message']['content'] as String;
@@ -62,10 +65,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Summary Screen'),
+        title: const Text('Summary Screen'),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pushReplacementNamed(context, Pages.uploadVoice, arguments: widget.taskModel),
         ),
       ),
@@ -74,9 +77,44 @@ class _SummaryScreenState extends State<SummaryScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text("Task Title: ${taskModel.title}"), // TaskModel의 title을 화면에 표시
-            SizedBox(height: 10),
-            Text("Task Description: ${taskModel.description}"), // TaskModel의 description을 화면에 표시
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
+            Text("Task Description: ${taskModel.description}"),// TaskModel의 description을 화면에 표시
+            //processTask가 완료되었을때 화면처리
+            BlocConsumer<TasksBloc, TasksState>(
+              listener: (context, state) {
+                if (state is VoiceFileUploadSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('File uploaded successfully!'),
+                    ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                //TODO summary를 출력하는건 VoiceFileUploadSuccess된 순간만 유지됨 (해결하는법?)
+                if (state is VoiceFileUploadSuccess) { // VoiceFileUploadSuccess 이벤트 발생 후
+                  return Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            const Text(
+                              '요약본 : ',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            Text("${state.processedTasks.first.summaryTexts}"),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return const Text("요약 생성전"); // 다른 상태에 대한 빈 위젯 반환
+              },
+            ),
+            const SizedBox(height: 10),
             ElevatedButton(
                 onPressed: () async{
                   String sum=await summarizeText(before);
@@ -84,8 +122,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     before=sum;
                   });
                 },
-                child: Text("summarizing")),
-            SizedBox(height: 10),
+                child: const Text("summarizing")),
+            const SizedBox(height: 10),
             Text(before),
           ],
         ),
