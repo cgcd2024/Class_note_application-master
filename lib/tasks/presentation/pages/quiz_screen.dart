@@ -3,37 +3,42 @@ import '../../../routes/pages.dart';
 import '../../data/local/model/task_model.dart';
 
 class QuizScreen extends StatefulWidget {
-  final TaskModel taskModel; // TaskModel 객체를 필수 매개변수로 추가
+  final TaskModel processedTasks; // TaskModel 객체를 필수 매개변수로 추가
 
-  // 생성자에서 TaskModel을 필수로 받도록 설정
-  const QuizScreen({Key? key, required this.taskModel}) : super(key: key);
+  // 생성자에서 TaskModel을 필수로 받도록 설정함
+  const QuizScreen({Key? key, required this.processedTasks}) : super(key: key);
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
+
 class _QuizScreenState extends State<QuizScreen> {
+  var before = '';
+
   @override
   Widget build(BuildContext context) {
-    // StatefulWidget에서는 widget 프로퍼티를 통해 StatefulWidget의 변수에 접근
-    final taskModel = widget.taskModel;
+    final taskModel = widget.processedTasks;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('QUIZ Screen'),
+        title: const Text('Summary Screen'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pushReplacementNamed(context, Pages.uploadVoice, arguments: widget.taskModel),
+          onPressed: () => Navigator.pushReplacementNamed(context, Pages.uploadVoice, arguments: widget.processedTasks),
         ),
       ),
       body: Center(
-        child: Column(
+        child: (taskModel.quizTexts == null || taskModel.quizTexts!.isEmpty)
+            ? const Text('생성중')
+        //TODO UI 디자인해서 여기를 만들어주세요
+            : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text("Task Title: ${taskModel.title}"), // TaskModel의 title을 화면에 표시
-            const SizedBox(height: 10),
-            Text("Task Description: ${taskModel.description}"), // TaskModel의 description을 화면에 표시
+            Text("Task Title: ${taskModel.title}"),
+            Text("Task Description: ${taskModel.description}"),
+            ...taskModel.quizTexts!.map((text) => Text(text)).toList(),
           ],
         ),
       ),
@@ -56,13 +61,13 @@ class _QuizScreenState extends State<QuizScreen> {
             case 0:
               Navigator.pushReplacementNamed(
                   context,
-                  Pages.createSummary, arguments: widget.taskModel
+                  Pages.createSummary, arguments: widget.processedTasks
               );
               break;
             case 1:
               Navigator.pushReplacementNamed(
                   context,
-                  Pages.createQuiz, arguments: widget.taskModel
+                  Pages.createQuiz, arguments: widget.processedTasks
               );
               break;
           }

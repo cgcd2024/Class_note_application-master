@@ -62,14 +62,14 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                     padding: const EdgeInsets.all(20),
                     child: BlocConsumer<TasksBloc, TasksState>(
                         listener: (context, state) {
-                      if (state is AddTaskFailure) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            getSnackBar(state.error, kRed));
-                      }
-                      if (state is AddTasksSuccess) {
-                        Navigator.pop(context);
-                      }
-                    }, builder: (context, state) {
+                          if (state is AddTaskFailure) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                getSnackBar(state.error, kRed));
+                          }
+                          if (state is AddTasksSuccess) {
+                            Navigator.pop(context);
+                          }
+                        }, builder: (context, state) {
                       return ListView(
                         children: [
                           TableCalendar(
@@ -106,7 +106,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                             decoration: BoxDecoration(
                                 color: kPrimaryColor.withOpacity(.1),
                                 borderRadius:
-                                    const BorderRadius.all(Radius.circular(5))),
+                                const BorderRadius.all(Radius.circular(5))),
                             child: buildText(
                                 _rangeStart != null && _rangeEnd != null
                                     ? 'Task starting at ${formatDate(dateTime: _rangeStart.toString())} - ${formatDate(dateTime: _rangeEnd.toString())}'
@@ -160,11 +160,11 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                                 child: ElevatedButton(
                                     style: ButtonStyle(
                                       foregroundColor:
-                                          WidgetStateProperty.all<Color>(
-                                              Colors.white),
+                                      WidgetStateProperty.all<Color>(
+                                          Colors.white),
                                       backgroundColor:
-                                          WidgetStateProperty.all<Color>(
-                                              kWhiteColor),
+                                      WidgetStateProperty.all<Color>(
+                                          kWhiteColor),
                                       shape: WidgetStateProperty.all<
                                           RoundedRectangleBorder>(
                                         RoundedRectangleBorder(
@@ -194,11 +194,11 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                                 child: ElevatedButton(
                                     style: ButtonStyle(
                                       foregroundColor:
-                                          WidgetStateProperty.all<Color>(
-                                              Colors.white),
+                                      WidgetStateProperty.all<Color>(
+                                          Colors.white),
                                       backgroundColor:
-                                          WidgetStateProperty.all<Color>(
-                                              kPrimaryColor),
+                                      WidgetStateProperty.all<Color>(
+                                          kPrimaryColor),
                                       shape: WidgetStateProperty.all<
                                           RoundedRectangleBorder>(
                                         RoundedRectangleBorder(

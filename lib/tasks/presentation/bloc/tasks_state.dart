@@ -1,7 +1,8 @@
 part of 'tasks_bloc.dart';
 
 @immutable
-abstract class TasksState {}
+abstract class TasksState {
+}
 
 class FetchTasksSuccess extends TasksState {
   final List<TaskModel> tasks;
@@ -35,16 +36,18 @@ class UpdateTaskFailure extends TasksState {
 
 class UpdateTaskSuccess extends TasksState {}
 
-//UpdateTaskSuccess 성공시 이벤트 처리
+// VoiceFileUploadSuccess 성공시 이벤트 처리
 class VoiceFileUploadSuccess extends TasksState {
-  final List<TaskModel> processedTasks;
+  final TaskModel processedTasks;
+
   VoiceFileUploadSuccess({required this.processedTasks});
-  List<TaskModel> getProcessedTasks() {
+
+  TaskModel getProcessedTasks() {
     return processedTasks;
   }
 }
 
-//실패시 처리코드
+// 실패시 처리코드
 class VoiceFileUploadFailure extends TasksState {
   final String error;
 

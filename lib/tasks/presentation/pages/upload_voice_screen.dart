@@ -9,9 +9,8 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
 import 'package:http/http.dart' as http;
-import '../../../routes/pages.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import '../../../routes/pages.dart';
 import '../../data/local/data_sources/tasks_data_provider.dart';
 import '../bloc/tasks_bloc.dart';
 
@@ -163,10 +162,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         var responseData = json.decode(utf8.decode(newResponse.bodyBytes));
         if (responseData.containsKey('text')) {
           String transcribedText = responseData['text'];
-          setState(() {
-            text = transcribedText;
-            widget.taskModel.transcribedTexts.add(transcribedText);  // TaskModel에 변환된 텍스트 추가
-          });
           return transcribedText;
         } else {
           throw Exception('API response does not contain text.');
@@ -185,7 +180,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   @override
   Widget build(BuildContext context) {
     final taskModel = widget.taskModel;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('앱 이름'),
@@ -233,44 +227,10 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
               child: const Text('Upload'),
             ),
             const SizedBox(height: 20),
-
-            //BLOC 이벤트가 완료되면 UI 처리코드
-            BlocConsumer<TasksBloc, TasksState>(
-              listener: (context, state) {
-                if (state is VoiceFileUploadSuccess) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('File uploaded successfully!'),
-                    ),
-                  );
-                }
-              },
-              builder: (context, state) {
-                if (state is VoiceFileUploadSuccess) {
-                  return Expanded(
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            const Text(
-                              'Converted Texts:',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            Text("${state.processedTasks.first.transcribedTexts}"),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return const Text("번역 생성이전");
-              },
-            )
           ],
         ),
       ),
+
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(

@@ -25,7 +25,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   _uploadVoiceFile(UploadVoiceFile event, Emitter<TasksState> emit) async {
     emit(TasksLoading());
     try {
-      List<TaskModel> processedTasks = await taskRepository.processTasks(event.taskModel);
+      TaskModel processedTasks = (await taskRepository.processTasks(event.taskModel)) as TaskModel;
       emit(VoiceFileUploadSuccess(processedTasks: processedTasks));
     } catch (exception) {
       emit(VoiceFileUploadFailure(exception.toString()));

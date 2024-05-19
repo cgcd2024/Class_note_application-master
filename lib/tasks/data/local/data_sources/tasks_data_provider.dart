@@ -154,10 +154,10 @@ class TaskDataProvider {
       return await _summaryTasks(input: myString);
     }).toList());
 
-    // TODO summary to quiz 코드
-    taskModel.quizTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
-      return await _quizTasks(input: myString);
-    }).toList());
+    // TODO summary to quiz 코드 여기가 완료되었다면, 주석을 풀면 됨
+    // taskModel.quizTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
+    //   return await _quizTasks(input: myString);
+    // }).toList());
 
     // TODO tasks 업데이트 코드
     tasks[tasks.indexWhere((element) => element.id == taskModel.id)] = taskModel;

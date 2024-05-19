@@ -35,15 +35,17 @@ Route onGenerateRoute(RouteSettings routeSettings) {
       return MaterialPageRoute(
         builder: (context) => UploadVoiceScreen(taskModel: args),
       );
+
     case Pages.createSummary:
       final args = routeSettings.arguments as TaskModel;
       return MaterialPageRoute(
-        builder: (context) => SummaryScreen(taskModel: args),
+        builder: (context) => SummaryScreen(processedTasks: args),
       );
+
     case Pages.createQuiz:
       final args = routeSettings.arguments as TaskModel;
       return MaterialPageRoute(
-        builder: (context) => QuizScreen(taskModel: args),
+        builder: (context) => QuizScreen(processedTasks: args),
       );
     default:
       return MaterialPageRoute(
