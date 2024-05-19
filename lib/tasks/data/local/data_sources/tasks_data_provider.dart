@@ -146,8 +146,6 @@ class TaskDataProvider {
     }).toList();
   }
 
-  // TODO 이 메소드 호출 전에 STT가 완료되어야 함,
-  // 왜냐하면 STT가 완료되지 않고 이 메소드가 실행되었을 경우 taskModel.transcribedTexts값이 null일 수 있기 때문
   Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
     // TODO text to summary 코드
     taskModel.summaryTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
@@ -159,15 +157,12 @@ class TaskDataProvider {
     //   return await _quizTasks(input: myString);
     // }).toList());
 
-    // TODO tasks 업데이트 코드
     tasks[tasks.indexWhere((element) => element.id == taskModel.id)] = taskModel;
     final List<String> taskJsonList = tasks.map((task) => json.encode(task.toJson())).toList();
     prefs!.setStringList(Constants.taskKey, taskJsonList);
     return tasks;
   }
 
-
-  // TODO 정민님 이 코드좀 완성시켜주세요. 퀴즈 만드는 메서드
   Future<String> _quizTasks({
     required String input
   }) async {

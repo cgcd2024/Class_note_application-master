@@ -6,8 +6,6 @@ import 'package:task_manager_app/tasks/presentation/pages/new_task_screen.dart';
 import 'package:task_manager_app/tasks/presentation/pages/tasks_screen.dart';
 import 'package:task_manager_app/tasks/presentation/pages/update_task_screen.dart';
 import 'package:task_manager_app/tasks/presentation/pages/upload_voice_screen.dart';
-import 'package:task_manager_app/tasks/presentation/pages/summary_screen.dart';
-import 'package:task_manager_app/tasks/presentation/pages/quiz_screen.dart';
 
 import '../page_not_found.dart';
 
@@ -34,18 +32,6 @@ Route onGenerateRoute(RouteSettings routeSettings) {
       final args = routeSettings.arguments as TaskModel;
       return MaterialPageRoute(
         builder: (context) => UploadVoiceScreen(taskModel: args),
-      );
-
-    case Pages.createSummary:
-      final args = routeSettings.arguments as TaskModel;
-      return MaterialPageRoute(
-        builder: (context) => SummaryScreen(processedTasks: args),
-      );
-
-    case Pages.createQuiz:
-      final args = routeSettings.arguments as TaskModel;
-      return MaterialPageRoute(
-        builder: (context) => QuizScreen(processedTasks: args),
       );
     default:
       return MaterialPageRoute(

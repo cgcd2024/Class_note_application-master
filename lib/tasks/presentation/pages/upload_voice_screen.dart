@@ -10,10 +10,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
-import '../../../routes/pages.dart';
+import 'package:task_manager_app/tasks/presentation/pages/quiz_screen.dart';
+import 'package:task_manager_app/tasks/presentation/pages/summary_screen.dart';
+import 'package:task_manager_app/tasks/presentation/pages/tasks_screen.dart';
 import '../../data/local/data_sources/tasks_data_provider.dart';
 import '../bloc/tasks_bloc.dart';
-
 
 class UploadVoiceScreen extends StatefulWidget {
   final TaskModel taskModel;
@@ -30,12 +31,14 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   bool _isRecording = false;
   bool _isRecorderInitialized = false;
   String? _recordedFilePath;
+  int _selectedIndex = 0;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    //이벤트처리를 위해 선언
     context.read<TasksBloc>().add(FetchTaskEvent());
+    _pageController = PageController(initialPage: _selectedIndex);
     requestPermissions().then((_) {
       _recorder = FlutterSoundRecorder();
       initRecorder();
@@ -46,7 +49,8 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     final outputPath = inputPath.replaceAll('.aac', '.mp3');
     final flutterFFmpeg = FlutterFFmpeg();
 
-    int result = await flutterFFmpeg.execute('-y -i "$inputPath" -codec:a libmp3lame -qscale:a 2 "$outputPath"');
+    int result = await flutterFFmpeg.execute(
+        '-y -i "$inputPath" -codec:a libmp3lame -qscale:a 2 "$outputPath"');
     if (result == 0) {
       logger.i('Conversion successful');
       return outputPath;
@@ -77,7 +81,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       _isRecorderInitialized = false;
     }
   }
-
 
   Future<void> startRecording() async {
     if (!_isRecorderInitialized || _recorder!.isRecording) {
@@ -117,11 +120,8 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         _recordedFilePath = mp3Path;
         try {
           String transcribedText = await convertSpeechToText(mp3Path);
-          List<String> updatedTranscribedTexts = List.from(widget.taskModel.transcribedTexts)
-            ..add(transcribedText);
-          TaskModel updatedTaskModel = widget.taskModel.copyWith(
-              transcribedTexts: updatedTranscribedTexts
-          );
+          List<String> updatedTranscribedTexts = List.from(widget.taskModel.transcribedTexts)..add(transcribedText);
+          TaskModel updatedTaskModel = widget.taskModel.copyWith(transcribedTexts: updatedTranscribedTexts);
           context.read<TasksBloc>().add(UpdateTaskEvent(taskModel: updatedTaskModel));
           context.read<TasksBloc>().add(UploadVoiceFile(taskModel: updatedTaskModel));
           setState(() {
@@ -142,9 +142,19 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   void dispose() {
     _recorder!.closeRecorder();
     _recorder = null;
+    _pageController.dispose();
     super.dispose();
   }
 
+  void _onPageChanged(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void _onItemTapped(int index) {
+    _pageController.jumpToPage(index);
+  }
 
   Future<String> convertSpeechToText(String filePath) async {
     final apiKey = dotenv.env['API_KEY'];
@@ -176,63 +186,84 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final taskModel = widget.taskModel;
     return Scaffold(
       appBar: AppBar(
         title: const Text('앱 이름'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text("Task Title: ${taskModel.title}"),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isRecording ? stopRecording : startRecording,
-              style: ElevatedButton.styleFrom(
-                shape: const CircleBorder(),
-                backgroundColor: _isRecording ? Colors.red : Colors.white,
-                minimumSize: const Size(200, 200),
-                padding: const EdgeInsets.all(20),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const TasksScreen(),
               ),
-              child: Icon(
-                _isRecording ? Icons.stop : Icons.mic,
-                size: 100,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text('Recording Status: ${_isRecording ? "Recording..." : "Stopped"}'),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                FilePickerResult? result = await FilePicker.platform.pickFiles();
-                if (result != null && result.files.isNotEmpty) {
-                  String filePath = result.files.single.path!;
-                  try {
-                    String transcribedText = await convertSpeechToText(filePath);
-                    List<String> updatedTranscribedTexts = List.from(widget.taskModel.transcribedTexts)..add(transcribedText);
-                    TaskModel updatedTaskModel = widget.taskModel.copyWith(transcribedTexts: updatedTranscribedTexts);
-                    context.read<TasksBloc>().add(UploadVoiceFile(taskModel: updatedTaskModel));
-                  } catch (e) {
-                    logger.e('음성을 텍스트로 변환하는 중 오류가 발생했습니다: $e');
-                  }
-                } else {
-                  logger.e('파일을 선택하지 않았습니다.');
-                }
-              },
-              child: const Text('Upload'),
-            ),
-            const SizedBox(height: 20),
-          ],
+            );
+          },
         ),
       ),
-
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _onPageChanged,
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text("Task Title: ${taskModel.title}"),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _isRecording ? stopRecording : startRecording,
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: _isRecording ? Colors.red : Colors.white,
+                    minimumSize: const Size(200, 200),
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  child: Icon(
+                    _isRecording ? Icons.stop : Icons.mic,
+                    size: 100,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text('Recording Status: ${_isRecording ? "Recording..." : "Stopped"}'),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    FilePickerResult? result = await FilePicker.platform.pickFiles();
+                    if (result != null && result.files.isNotEmpty) {
+                      String filePath = result.files.single.path!;
+                      try {
+                        String transcribedText = await convertSpeechToText(filePath);
+                        List<String> updatedTranscribedTexts = List.from(widget.taskModel.transcribedTexts)..add(transcribedText);
+                        TaskModel updatedTaskModel = widget.taskModel.copyWith(transcribedTexts: updatedTranscribedTexts);
+                        context.read<TasksBloc>().add(UploadVoiceFile(taskModel: updatedTaskModel));
+                      } catch (e) {
+                        logger.e('음성을 텍스트로 변환하는 중 오류가 발생했습니다: $e');
+                      }
+                    } else {
+                      logger.e('파일을 선택하지 않았습니다.');
+                    }
+                  },
+                  child: const Text('Upload'),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+          SummaryScreen(processedTasks: taskModel),
+          QuizScreen(processedTasks: taskModel)
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.mic),
+            label: 'Record',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.note),
             label: 'Summary',
@@ -242,26 +273,13 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
             label: 'Quiz',
           ),
         ],
+        currentIndex: _selectedIndex,
         backgroundColor: Colors.grey[50],
-        selectedItemColor: Colors.black,  // 선택된 아이템의 색상을 검정색으로 설정
+        selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,
-        onTap: (int index) {
-          switch (index) {
-            case 0:
-              Navigator.pushReplacementNamed(
-                  context,
-                  Pages.createSummary, arguments: widget.taskModel
-              );
-              break;
-            case 1:
-              Navigator.pushReplacementNamed(
-                  context,
-                  Pages.createQuiz, arguments: widget.taskModel
-              );
-              break;
-          }
-        },
+        onTap: _onItemTapped,
       ),
     );
   }
 }
+
