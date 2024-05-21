@@ -35,8 +35,10 @@ class _TaskItemViewState extends State<TaskItemView> {
                       title: widget.taskModel.title,
                       description: widget.taskModel.description,
                       completed: !widget.taskModel.completed,
-                      startDateTime: widget.taskModel.startDateTime,
-                      stopDateTime: widget.taskModel.stopDateTime);
+                      makeDateTime: widget.taskModel.makeDateTime
+                      // startDateTime: widget.taskModel.startDateTime,
+                      // stopDateTime: widget.taskModel.stopDateTime
+                  );
                   context.read<TasksBloc>().add(
                       UpdateTaskEvent(taskModel: taskModel));
                 }),
@@ -147,10 +149,11 @@ class _TaskItemViewState extends State<TaskItemView> {
                         SvgPicture.asset('assets/svgs/calender.svg', width: 12,),
                         const SizedBox(width: 10,),
                         Expanded(child: buildText(
-                            '${formatDate(dateTime: widget.taskModel
-                                .startDateTime.toString())} - ${formatDate(dateTime: widget.taskModel
-                                .stopDateTime.toString())}', kBlackColor, textTiny,
-                            FontWeight.w400, TextAlign.start, TextOverflow.clip),)
+                            formatDate(dateTime: widget.taskModel
+                                .makeDateTime.toString()),
+                            kBlackColor, textTiny,
+                            FontWeight.w400, TextAlign.start, TextOverflow.clip
+                        ),)
                       ],
                     )
                   ),
