@@ -20,7 +20,8 @@ import 'package:path/path.dart' as path;
 class UploadVoiceScreen extends StatefulWidget {
   final TaskModel taskModel;
 
-  const UploadVoiceScreen({Key? key, required this.taskModel}) : super(key: key);
+  const UploadVoiceScreen({Key? key, required this.taskModel})
+      : super(key: key);
 
   @override
   State<UploadVoiceScreen> createState() => _UploadVoiceScreenState();
@@ -59,8 +60,12 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       int start = 0;
       while (start < fileSize) {
         int end = (start + sliceSize < fileSize) ? start + sliceSize : fileSize;
-        String slicePath = '${path.dirname(filePath)}/${path.basename(filePath)}.slice$start-$end${path.extension(filePath)}';
-        List<int> sliceBytes = await file.openRead(start, end).toList().then((list) => list.expand((x) => x).toList());
+        String slicePath =
+            '${path.dirname(filePath)}/${path.basename(filePath)}.slice$start-$end${path.extension(filePath)}';
+        List<int> sliceBytes = await file
+            .openRead(start, end)
+            .toList()
+            .then((list) => list.expand((x) => x).toList());
         await File(slicePath).writeAsBytes(sliceBytes);
         transcribedText += await processFile(slicePath);
         start += sliceSize;
@@ -89,7 +94,8 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
           throw Exception('API response does not contain text.');
         }
       } else {
-        throw Exception('API call failed. Status code: ${newResponse.statusCode}');
+        throw Exception(
+            'API call failed. Status code: ${newResponse.statusCode}');
       }
     } catch (e) {
       throw Exception('Exception during API call: $e');
@@ -185,10 +191,16 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         _recordedFilePath = mp3Path;
         try {
           String transcribedText = await convertSpeechToText(mp3Path);
-          List<String> updatedTranscribedTexts = List.from(widget.taskModel.transcribedTexts)..add(transcribedText);
-          TaskModel updatedTaskModel = widget.taskModel.copyWith(transcribedTexts: updatedTranscribedTexts);
-          context.read<TasksBloc>().add(UpdateTaskEvent(taskModel: updatedTaskModel));
-          context.read<TasksBloc>().add(UploadVoiceFile(taskModel: updatedTaskModel));
+          String updatedTranscribedTexts =
+              '${widget.taskModel.transcribedTexts}\n$transcribedText'.trim();
+          TaskModel updatedTaskModel = widget.taskModel
+              .copyWith(transcribedTexts: updatedTranscribedTexts);
+          context
+              .read<TasksBloc>()
+              .add(UpdateTaskEvent(taskModel: updatedTaskModel));
+          context
+              .read<TasksBloc>()
+              .add(UploadVoiceFile(taskModel: updatedTaskModel));
           setState(() {
             text = transcribedText;
           });
@@ -264,11 +276,13 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text('Recording Status: ${_isRecording ? "Recording..." : "Stopped"}'),
+                Text(
+                    'Recording Status: ${_isRecording ? "Recording..." : "Stopped"}'),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform.pickFiles();
+                    FilePickerResult? result =
+                        await FilePicker.platform.pickFiles();
                     if (result != null && result.files.isNotEmpty) {
                       String filePath = result.files.single.path!;
                       if (path.extension(filePath).toLowerCase() == '.m4a') {
@@ -276,9 +290,11 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                       }
                       try {
                         String transcribedText = await convertSpeechToText(filePath);
-                        List<String> updatedTranscribedTexts = List.from(widget.taskModel.transcribedTexts)..add(transcribedText);
-                        TaskModel updatedTaskModel = widget.taskModel.copyWith(transcribedTexts: updatedTranscribedTexts);
+                        TaskModel updatedTaskModel = widget.taskModel.copyWith(
+                            transcribedTexts: transcribedText);
+                        print(updatedTaskModel);
                         context.read<TasksBloc>().add(UploadVoiceFile(taskModel: updatedTaskModel));
+                        context.read<TasksBloc>().add(UpdateTaskEvent(taskModel: updatedTaskModel));
                       } catch (e) {
                         logger.e('음성을 텍스트로 변환하는 중 오류가 발생했습니다: $e');
                       }
@@ -289,6 +305,11 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                   child: const Text('Upload'),
                 ),
                 const SizedBox(height: 20),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Text(taskModel.transcribedTexts),
+                  ),
+                ),
               ],
             ),
           ),
@@ -320,4 +341,3 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     );
   }
 }
-

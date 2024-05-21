@@ -30,6 +30,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
     "AI 챗봇은 자연어 처리 기술로 사용자와 대화하며 다양한 정보를 제공합니다.",
   ];
 
+
   @override
   Widget build(BuildContext context) {
     final taskModel = widget.processedTasks;

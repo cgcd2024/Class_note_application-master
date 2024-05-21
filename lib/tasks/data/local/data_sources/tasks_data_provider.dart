@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
 import 'package:task_manager_app/utils/exception_handler.dart';
@@ -37,7 +38,7 @@ class TaskDataProvider {
         });
       }
       return tasks;
-    }catch(e){
+    } catch (e) {
       throw Exception(handleException(e));
     }
   }
@@ -48,16 +49,16 @@ class TaskDataProvider {
       case 0:
         tasks.sort((a, b) {
           // Sort by date
-          if (a.startDateTime!.isAfter(b.startDateTime!)) {
+          if (a.makeDateTime!.isAfter(b.makeDateTime!)) {
             return 1;
-          } else if (a.startDateTime!.isBefore(b.startDateTime!)) {
+          } else if (a.makeDateTime!.isBefore(b.makeDateTime!)) {
             return -1;
           }
           return 0;
         });
         break;
       case 1:
-        //sort by completed tasks
+      //sort by completed tasks
         tasks.sort((a, b) {
           if (!a.completed && b.completed) {
             return 1;
@@ -89,7 +90,7 @@ class TaskDataProvider {
       tasks.add(taskModel);
       //요건 main.dart에서 언급한 로컬 저장소에 변경된 tasks를 넣음
       final List<String> taskJsonList =
-          tasks.map((task) => json.encode(task.toJson())).toList();
+      tasks.map((task) => json.encode(task.toJson())).toList();
       await prefs!.setStringList(Constants.taskKey, taskJsonList);
     } catch (exception) {
       throw Exception(handleException(exception));
@@ -112,8 +113,8 @@ class TaskDataProvider {
         }
       });
       // 애도 로컬에 다시 저장
-      final List<String> taskJsonList = tasks.map((task) =>
-          json.encode(task.toJson())).toList();
+      final List<String> taskJsonList =
+      tasks.map((task) => json.encode(task.toJson())).toList();
       prefs!.setStringList(Constants.taskKey, taskJsonList);
       return tasks;
     } catch (exception) {
@@ -125,8 +126,8 @@ class TaskDataProvider {
   Future<List<TaskModel>> deleteTask(TaskModel taskModel) async {
     try {
       tasks.remove(taskModel);
-      final List<String> taskJsonList = tasks.map((task) =>
-          json.encode(task.toJson())).toList();
+      final List<String> taskJsonList =
+      tasks.map((task) => json.encode(task.toJson())).toList();
       prefs!.setStringList(Constants.taskKey, taskJsonList);
       return tasks;
     } catch (exception) {
@@ -141,31 +142,78 @@ class TaskDataProvider {
     // title 혹은 desc에 keyword가 포함되는것들만 반환
     return matchedTasked.where((task) {
       final titleMatches = task.title.toLowerCase().contains(searchText);
-      final descriptionMatches = task.description.toLowerCase().contains(searchText);
+      final descriptionMatches =
+      task.description.toLowerCase().contains(searchText);
       return titleMatches || descriptionMatches;
     }).toList();
   }
 
   Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
-    // TODO text to summary 코드
-    taskModel.summaryTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
-      return await _summaryTasks(input: myString);
-    }).toList());
+    //text to summary 코드
+    //TODO transcribedTexts이 list<string> to string으로 바뀌었음으로, 수정바람
+    taskModel.summaryTexts = (await _summaryTasks(input: taskModel.transcribedTexts)) as List<String>?;
 
-    // TODO summary to quiz 코드 여기가 완료되었다면, 주석을 풀면 됨
-    // taskModel.quizTexts = await Future.wait(taskModel.transcribedTexts.map((myString) async {
-    //   return await _quizTasks(input: myString);
+
+    // summary to describe 코드
+    // taskModel.describeTexts =
+    // await Future.wait(taskModel.summaryTexts!.map((myString) async {
+    //   return await _summaryTasks(input: myString);
     // }).toList());
 
-    tasks[tasks.indexWhere((element) => element.id == taskModel.id)] = taskModel;
-    final List<String> taskJsonList = tasks.map((task) => json.encode(task.toJson())).toList();
+
+    //TODO transcribedTexts이 list<string> to string으로 바뀌었음으로, 수정바람
+    //summary to quiz 코드
+    // taskModel.quizTexts =
+    // await Future.wait(taskModel.transcribedTexts.map((myString) async {
+    //   return await _quizTasks(input: myString);
+    // }).toList());
+    taskModel.quizTexts = (await _quizTasks(input: taskModel.transcribedTexts)) as List<String>?;
+
+    tasks[tasks.indexWhere((element) => element.id == taskModel.id)] =
+        taskModel;
+    final List<String> taskJsonList =
+    tasks.map((task) => json.encode(task.toJson())).toList();
     prefs!.setStringList(Constants.taskKey, taskJsonList);
     return tasks;
   }
 
-  Future<String> _quizTasks({
-    required String input
-  }) async {
+  Future<String> _quizTasks({required String input}) async {
+    final apiKey = dotenv.env['API_KEY'];
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
+
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      },
+      body: jsonEncode({
+        'model': 'gpt-3.5-turbo',
+        "messages": [
+          {
+            "role": "system",
+            "content":
+            "너는 user가 보낸 글의 내용을 기반으로 주관식 문제를 만들어내는 봇이야. 문제를 만들고 해답을 알려 줘."
+          },
+          {"role": "assistant", "content": "문제 : \n해답 : \n"},
+          {"role": "user", "content": input}
+        ],
+        'max_tokens': 300,
+      }),
+    );
+    logger.i('openai response: '
+        '${utf8.decode(response.bodyBytes)}');
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      final quiz = decoded['choices'][0]['message']['content'] as String;
+      return quiz;
+    } else {
+      throw Exception('Failed to summarize text');
+    }
+  }
+
+  Future<String> _summaryTasks({required String input}) async {
     final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
     const endpoint = 'https://api.openai.com/v1/chat/completions';
 
@@ -176,16 +224,10 @@ class TaskDataProvider {
         'Authorization': 'Bearer $apiKey',
       },
       body: jsonEncode({
-        'model':'gpt-3.5-turbo',
+        'model': 'gpt-3.5-turbo',
         "messages": [
-          {
-            "role": "system",
-            "content": "You are a helpful assistant."
-          },
-          {
-            "role": "user",
-            "content": "다음 문장을 요약해주세요. $input"
-          }
+          {"role": "system", "content": "다음 문장을 요약해주세요"},
+          {"role": "user", "content": input}
         ]
         // 'max_tokens': 50, // Adjust the summary length as needed
       }),
@@ -202,10 +244,7 @@ class TaskDataProvider {
     }
   }
 
-
-  Future<String> _summaryTasks({
-    required String input
-  }) async {
+  Future<String> _summaryDescribeTasks({required String input}) async {
     final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
     const endpoint = 'https://api.openai.com/v1/chat/completions';
 
@@ -216,16 +255,10 @@ class TaskDataProvider {
         'Authorization': 'Bearer $apiKey',
       },
       body: jsonEncode({
-        'model':'gpt-3.5-turbo',
+        'model': 'gpt-3.5-turbo',
         "messages": [
-          {
-            "role": "system",
-            "content": "You are a helpful assistant."
-          },
-          {
-            "role": "user",
-            "content": "다음 문장을 요약해주세요. $input"
-          }
+          {"role": "system", "content": "다음 문장을 설명해주세요."},
+          {"role": "user", "content": input}
         ]
         // 'max_tokens': 50, // Adjust the summary length as needed
       }),

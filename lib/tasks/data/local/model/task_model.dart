@@ -7,7 +7,7 @@ class TaskModel {
   // DateTime? stopDateTime;
   bool completed;
   // TODO (재현) : transcribedTexts nullable 해도 되는지?
-  List<String> transcribedTexts; // 변환된 텍스트 목록을 저장하는 리스트 추가
+  String transcribedTexts; // 변환된 텍스트 목록을 저장하는 리스트 추가
   List<String>? summaryTexts; // 요약된 텍스트 리스트
   List<String>? quizTexts;
   List<String>? describeTexts;
@@ -20,7 +20,7 @@ class TaskModel {
     // required this.startDateTime,
     // required this.stopDateTime,
     this.completed = false,
-    this.transcribedTexts = const [], // 기본값으로 빈 리스트 설정
+    this.transcribedTexts = '', // 기본값으로 빈 값
     this.summaryTexts, // 기본값 null으로 설정
     this.quizTexts,
     this.describeTexts,
@@ -34,7 +34,7 @@ class TaskModel {
     // DateTime? startDateTime,
     // DateTime? stopDateTime,
     bool? completed,
-    List<String>? transcribedTexts,
+    String? transcribedTexts,
     List<String>? summaryTexts,
     List<String>? quizTexts,
     List<String>? describeTexts,
@@ -79,9 +79,7 @@ class TaskModel {
         makeDateTime: DateTime.parse(json['makeDateTime']),
         // startDateTime: DateTime.parse(json['startDateTime']),
         // stopDateTime: DateTime.parse(json['stopDateTime']),
-        transcribedTexts: json['transcribedTexts'] != null
-            ? List<String>.from(json['transcribedTexts'])
-            : [], // JSON 배열을 List<String>으로 변환
+        transcribedTexts: json['transcribedTexts'] ?? '', // JSON에서 문자열로 변환
         summaryTexts: json['summaryTexts'] != null
             ? List<String>.from(json['summaryTexts'])
             : [],
