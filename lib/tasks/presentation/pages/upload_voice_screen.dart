@@ -15,6 +15,7 @@ import 'package:task_manager_app/tasks/presentation/pages/summary_screen.dart';
 import 'package:task_manager_app/tasks/presentation/pages/tasks_screen.dart';
 import '../../data/local/data_sources/tasks_data_provider.dart';
 import '../bloc/tasks_bloc.dart';
+import 'package:path/path.dart' as path;
 
 class UploadVoiceScreen extends StatefulWidget {
   final TaskModel taskModel;
@@ -43,6 +44,70 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       _recorder = FlutterSoundRecorder();
       initRecorder();
     });
+  }
+
+  Future<String> convertSpeechToText(String filePath) async {
+    const maxFileSize = 25 * 1024 * 1024;
+    const sliceSize = 20 * 1024 * 1024;
+    final file = File(filePath);
+    final fileSize = await file.length();
+
+    if (fileSize <= maxFileSize) {
+      return await processFile(filePath);
+    } else {
+      String transcribedText = '';
+      int start = 0;
+      while (start < fileSize) {
+        int end = (start + sliceSize < fileSize) ? start + sliceSize : fileSize;
+        String slicePath = '${path.dirname(filePath)}/${path.basename(filePath)}.slice$start-$end${path.extension(filePath)}';
+        List<int> sliceBytes = await file.openRead(start, end).toList().then((list) => list.expand((x) => x).toList());
+        await File(slicePath).writeAsBytes(sliceBytes);
+        transcribedText += await processFile(slicePath);
+        start += sliceSize;
+      }
+      return transcribedText;
+    }
+  }
+
+  Future<String> processFile(String filePath) async {
+    final apiKey = dotenv.env['API_KEY'];
+    var url = Uri.https("api.openai.com", "/v1/audio/transcriptions");
+    var request = http.MultipartRequest('POST', url);
+    request.headers.addAll({"Authorization": "Bearer $apiKey"});
+    request.fields['model'] = 'whisper-1';
+    request.fields['language'] = 'ko';
+    request.files.add(await http.MultipartFile.fromPath('file', filePath));
+    try {
+      var response = await request.send();
+      var newResponse = await http.Response.fromStream(response);
+      if (newResponse.statusCode == 200) {
+        var responseData = json.decode(utf8.decode(newResponse.bodyBytes));
+        if (responseData.containsKey('text')) {
+          String transcribedText = responseData['text'];
+          return transcribedText;
+        } else {
+          throw Exception('API response does not contain text.');
+        }
+      } else {
+        throw Exception('API call failed. Status code: ${newResponse.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Exception during API call: $e');
+    }
+  }
+
+  Future<String> convertM4aToMp3(String inputPath) async {
+    final outputPath = inputPath.replaceAll('.m4a', '.mp3');
+    final flutterFFmpeg = FlutterFFmpeg();
+
+    int result = await flutterFFmpeg.execute(
+        '-y -i "$inputPath" -codec:a libmp3lame -qscale:a 2 "$outputPath"');
+    if (result == 0) {
+      logger.i('Conversion successful');
+      return outputPath;
+    } else {
+      throw Exception('Failed to convert file');
+    }
   }
 
   Future<String> convertAacToMp3(String inputPath) async {
@@ -156,36 +221,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     _pageController.jumpToPage(index);
   }
 
-  Future<String> convertSpeechToText(String filePath) async {
-    final apiKey = dotenv.env['API_KEY'];
-    var url = Uri.https("api.openai.com", "/v1/audio/transcriptions");
-    var request = http.MultipartRequest('POST', url);
-    request.headers.addAll({"Authorization": "Bearer $apiKey"});
-    request.fields['model'] = 'whisper-1';
-    request.fields['language'] = 'ko';
-    request.files.add(await http.MultipartFile.fromPath('file', filePath));
-
-    try {
-      var response = await request.send();
-      var newResponse = await http.Response.fromStream(response);
-      if (newResponse.statusCode == 200) {
-        var responseData = json.decode(utf8.decode(newResponse.bodyBytes));
-        if (responseData.containsKey('text')) {
-          String transcribedText = responseData['text'];
-          return transcribedText;
-        } else {
-          throw Exception('API response does not contain text.');
-        }
-      } else {
-        logger.e('API call failed with status code: ${newResponse.statusCode}');
-        throw Exception('API call failed. Status code: ${newResponse.statusCode}');
-      }
-    } catch (e) {
-      logger.e('Exception during API call: $e');
-      rethrow;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final taskModel = widget.taskModel;
@@ -236,6 +271,9 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                     FilePickerResult? result = await FilePicker.platform.pickFiles();
                     if (result != null && result.files.isNotEmpty) {
                       String filePath = result.files.single.path!;
+                      if (path.extension(filePath).toLowerCase() == '.m4a') {
+                        filePath = await convertM4aToMp3(filePath);
+                      }
                       try {
                         String transcribedText = await convertSpeechToText(filePath);
                         List<String> updatedTranscribedTexts = List.from(widget.taskModel.transcribedTexts)..add(transcribedText);

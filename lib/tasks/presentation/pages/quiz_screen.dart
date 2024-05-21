@@ -10,21 +10,44 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  //TODO 더미데이터를 넣어서 ui 디자인 코드 만들어주세요
   @override
   Widget build(BuildContext context) {
     final taskModel = widget.processedTasks;
 
+    List<Map<String, String>> QnAdic = [
+      {'question': 'question1', 'answer': 'answer1'},
+      {'question': 'question2', 'answer': 'answer2'},
+      {'question': 'question3', 'answer': 'answer3'}
+    ];
+
     return Scaffold(
-      body: Center(
-        child: (taskModel.quizTexts == null || taskModel.quizTexts!.isEmpty)
-            ? const Text('생성중')
-            : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: SingleChildScrollView(
+        child: Column(
           children: <Widget>[
-            Text("Quiz page: ${taskModel.title}"),
-            Text("Task Description: ${taskModel.description}"),
-            ...taskModel.quizTexts!.map((text) => Text(text)).toList(),
+            ExpansionTile(
+              title: Text(QnAdic[0]['question']!),
+              children: <Widget>[
+                ListTile(
+                  title: Text(QnAdic[0]['answer']!),
+                ),
+              ],
+            ),
+            ExpansionTile(
+              title: Text(QnAdic[1]['question']!),
+              children: <Widget>[
+                ListTile(
+                  title: Text(QnAdic[1]['answer']!),
+                ),
+              ],
+            ),
+            ExpansionTile(
+              title: Text(QnAdic[2]['question']!),
+              children: <Widget>[
+                ListTile(
+                  title: Text(QnAdic[2]['answer']!),
+                ),
+              ],
+            ),
           ],
         ),
       ),
