@@ -148,13 +148,20 @@ class TaskDataProvider {
   }
 
   Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
-    // TODO text to summary 코드
+    // text to summary 코드
     taskModel.summaryTexts =
         await Future.wait(taskModel.transcribedTexts.map((myString) async {
       return await _summaryTasks(input: myString);
     }).toList());
 
-    // TODO summary to quiz 코드
+    // summary to describe 코드
+    taskModel.describeTexts =
+    await Future.wait(taskModel.summaryTexts!.map((myString) async {
+      return await _summaryTasks(input: myString);
+    }).toList());
+
+
+    // summary to quiz 코드
     taskModel.quizTexts =
         await Future.wait(taskModel.transcribedTexts.map((myString) async {
       return await _quizTasks(input: myString);
@@ -217,8 +224,39 @@ class TaskDataProvider {
       body: jsonEncode({
         'model': 'gpt-3.5-turbo',
         "messages": [
-          {"role": "system", "content": "You are a helpful assistant."},
-          {"role": "user", "content": "다음 문장을 요약해주세요. $input"}
+          {"role": "system", "content": "다음 문장을 요약해주세요"},
+          {"role": "user", "content": input}
+        ]
+        // 'max_tokens': 50, // Adjust the summary length as needed
+      }),
+    );
+    logger.i('openai response: '
+        '${utf8.decode(response.bodyBytes)}');
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      final summary = decoded['choices'][0]['message']['content'] as String;
+      return summary;
+    } else {
+      throw Exception('Failed to summarize text');
+    }
+  }
+
+  Future<String> _summaryDescribeTasks({required String input}) async {
+    final apiKey = dotenv.env['API_KEY']; // Replace with your actual API key
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
+
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      },
+      body: jsonEncode({
+        'model': 'gpt-3.5-turbo',
+        "messages": [
+          {"role": "system", "content": "다음 문장을 설명해주세요."},
+          {"role": "user", "content": input}
         ]
         // 'max_tokens': 50, // Adjust the summary length as needed
       }),
