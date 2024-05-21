@@ -80,7 +80,6 @@ flutter:
   assets:
     - assets/images/
     - assets/svgs/
-    - assets/images/
     - assets/config/.env
 
   fonts:

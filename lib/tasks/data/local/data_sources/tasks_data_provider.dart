@@ -48,9 +48,9 @@ class TaskDataProvider {
       case 0:
         tasks.sort((a, b) {
           // Sort by date
-          if (a.startDateTime!.isAfter(b.startDateTime!)) {
+          if (a.makeDateTime!.isAfter(b.makeDateTime!)) {
             return 1;
-          } else if (a.startDateTime!.isBefore(b.startDateTime!)) {
+          } else if (a.makeDateTime!.isBefore(b.makeDateTime!)) {
             return -1;
           }
           return 0;

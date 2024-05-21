@@ -2,8 +2,9 @@ class TaskModel {
   String id;
   String title;
   String description;
-  DateTime? startDateTime;
-  DateTime? stopDateTime;
+  DateTime? makeDateTime;
+  // DateTime? startDateTime;
+  // DateTime? stopDateTime;
   bool completed;
   // TODO (재현) : transcribedTexts nullable 해도 되는지?
   List<String> transcribedTexts; // 변환된 텍스트 목록을 저장하는 리스트 추가
@@ -14,8 +15,9 @@ class TaskModel {
     required this.id,
     required this.title,
     required this.description,
-    required this.startDateTime,
-    required this.stopDateTime,
+    required this.makeDateTime,
+    // required this.startDateTime,
+    // required this.stopDateTime,
     this.completed = false,
     this.transcribedTexts = const [], // 기본값으로 빈 리스트 설정
     this.summaryTexts, // 기본값 null으로 설정
@@ -26,8 +28,9 @@ class TaskModel {
     String? id,
     String? title,
     String? description,
-    DateTime? startDateTime,
-    DateTime? stopDateTime,
+    DateTime? makeDateTime,
+    // DateTime? startDateTime,
+    // DateTime? stopDateTime,
     bool? completed,
     List<String>? transcribedTexts,
     List<String>? summaryTexts,
@@ -36,8 +39,9 @@ class TaskModel {
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
-      startDateTime: startDateTime ?? this.startDateTime,
-      stopDateTime: stopDateTime ?? this.stopDateTime,
+      makeDateTime: makeDateTime ?? this.makeDateTime,
+      // startDateTime: startDateTime ?? this.startDateTime,
+      // stopDateTime: stopDateTime ?? this.stopDateTime,
       completed: completed ?? this.completed,
       transcribedTexts: transcribedTexts ?? this.transcribedTexts,
       summaryTexts: summaryTexts ?? this.summaryTexts,
@@ -50,8 +54,9 @@ class TaskModel {
       'title': title,
       'description': description,
       'completed': completed,
-      'startDateTime': startDateTime?.toIso8601String(),
-      'stopDateTime': stopDateTime?.toIso8601String(),
+      'makeDateTime': makeDateTime?.toIso8601String(),
+      // 'startDateTime': startDateTime?.toIso8601String(),
+      // 'stopDateTime': stopDateTime?.toIso8601String(),
       'transcribedTexts': transcribedTexts, // 리스트를 JSON 배열로 변환
       'summaryTexts': summaryTexts,
       'quizTexts': quizTexts,
@@ -64,8 +69,9 @@ class TaskModel {
         title: json['title'],
         description: json['description'],
         completed: json['completed'],
-        startDateTime: DateTime.parse(json['startDateTime']),
-        stopDateTime: DateTime.parse(json['stopDateTime']),
+        makeDateTime: DateTime.parse(json['makeDateTime']),
+        // startDateTime: DateTime.parse(json['startDateTime']),
+        // stopDateTime: DateTime.parse(json['stopDateTime']),
         transcribedTexts: json['transcribedTexts'] != null
             ? List<String>.from(json['transcribedTexts'])
             : [], // JSON 배열을 List<String>으로 변환
@@ -80,7 +86,8 @@ class TaskModel {
   @override
   String toString() {
     return 'TaskModel{id: $id, title: $title, description: $description, '
-        'startDateTime: $startDateTime, stopDateTime: $stopDateTime, '
+        'makeDateTime: $makeDateTime,'
+        // 'startDateTime: $startDateTime, stopDateTime: $stopDateTime, '
         'completed: $completed,'
         'transcribedTexts: $transcribedTexts'
         'summaryTexts: $summaryTexts'

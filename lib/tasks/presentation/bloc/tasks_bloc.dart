@@ -41,12 +41,15 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       if (event.taskModel.description.trim().isEmpty) {
         return emit(AddTaskFailure(error: '메모를 입력하세요'));
       }
-      if (event.taskModel.startDateTime == null) {
+      if (event.taskModel.makeDateTime == null) {
         return emit(AddTaskFailure(error: 'Missing task start date'));
       }
-      if (event.taskModel.stopDateTime == null) {
-        return emit(AddTaskFailure(error: 'Missing task stop date'));
-      }
+      // if (event.taskModel.startDateTime == null) {
+      //   return emit(AddTaskFailure(error: 'Missing task start date'));
+      // }
+      // if (event.taskModel.stopDateTime == null) {
+      //   return emit(AddTaskFailure(error: 'Missing task stop date'));
+      // }
       await taskRepository.createNewTask(event.taskModel);
       emit(AddTasksSuccess());
       final tasks = await taskRepository.getTasks();
@@ -75,12 +78,15 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         return emit(
             UpdateTaskFailure(error: 'Task description cannot be blank'));
       }
-      if (event.taskModel.startDateTime == null) {
+      if (event.taskModel.makeDateTime == null) {
         return emit(UpdateTaskFailure(error: 'Missing task start date'));
       }
-      if (event.taskModel.stopDateTime == null) {
-        return emit(UpdateTaskFailure(error: 'Missing task stop date'));
-      }
+      // if (event.taskModel.startDateTime == null) {
+      //   return emit(UpdateTaskFailure(error: 'Missing task start date'));
+      // }
+      // if (event.taskModel.stopDateTime == null) {
+      //   return emit(UpdateTaskFailure(error: 'Missing task stop date'));
+      // }
       emit(TasksLoading());
       final tasks = await taskRepository.updateTask(event.taskModel);
       emit(UpdateTaskSuccess());
