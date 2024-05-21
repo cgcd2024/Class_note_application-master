@@ -154,7 +154,7 @@ class TaskDataProvider {
       return await _summaryTasks(input: myString);
     }).toList());
 
-    // TODO summary to quiz 코드 여기가 완료되었다면, 주석을 풀면 됨
+    // TODO summary to quiz 코드
     taskModel.quizTexts =
         await Future.wait(taskModel.transcribedTexts.map((myString) async {
       return await _quizTasks(input: myString);
@@ -197,8 +197,8 @@ class TaskDataProvider {
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-      final summary = decoded['choices'][0]['message']['content'] as String;
-      return summary;
+      final quiz = decoded['choices'][0]['message']['content'] as String;
+      return quiz;
     } else {
       throw Exception('Failed to summarize text');
     }
