@@ -20,6 +20,26 @@ class _QuizScreenState extends State<QuizScreen> {
       {'question': 'question3', 'answer': 'answer3'}
     ];
 
+    List<String> quizTexts = taskModel.quizTexts!.toList();
+
+    for (var i = 0; i < QnAdic.length; i++) {
+      String slicedString = '';
+      var beforeQuestionFin = true;
+      for (var j = 0; j < quizTexts[i].length; j++) {
+        if (quizTexts[i][j] != '\n') {
+          slicedString += quizTexts[i][j];
+        } else {
+          if (beforeQuestionFin) {
+            QnAdic[i]['question'] = slicedString;
+            beforeQuestionFin = false;
+          } else {
+            QnAdic[i]['answer'] = slicedString;
+          }
+          slicedString = '';
+        }
+      }
+    }
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
