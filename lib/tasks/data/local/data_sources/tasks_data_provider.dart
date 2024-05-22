@@ -150,16 +150,11 @@ class TaskDataProvider {
 
   Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
     //text to summary 코드
-    //TODO transcribedTexts이 list<string> to string으로 바뀌었음으로, 수정바람
-    taskModel.summaryTexts = (await _summaryTasks(input: taskModel.transcribedTexts)) as List<String>?;
-
+    // TODO 일단 List<String> 형은 그대로 둔 상태에서 첫번째 인덱스에 값을 넣었음. 후에 어떻게 될지 몰라서
+    taskModel.summaryTexts?.add(await _summaryTasks(input: taskModel.transcribedTexts));
 
     // summary to describe 코드
-    // taskModel.describeTexts =
-    // await Future.wait(taskModel.summaryTexts!.map((myString) async {
-    //   return await _summaryTasks(input: myString);
-    // }).toList());
-
+    taskModel.describeTexts?.add(await _summaryDescribeTasks(input: taskModel.summaryTexts!.first));
 
     //TODO transcribedTexts이 list<string> to string으로 바뀌었음으로, 수정바람
     //summary to quiz 코드
