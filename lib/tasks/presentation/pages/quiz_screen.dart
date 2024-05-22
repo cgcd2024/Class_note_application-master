@@ -23,7 +23,15 @@ class _QuizScreenState extends State<QuizScreen> {
       {'question': 'question3', 'answer': 'answer3'}
     ];
 
-    List<String> quizTexts = taskModel.quizTexts!.toList();
+    //실제 실행 시 quizTexts 아래 코드로 넣기
+    //List<String> quizTexts = taskModel.quizTexts!.toList();
+
+    //임시 리스트
+    List<String> quizTexts = [
+      "문제 : 문제1\n해답 : 해답1\n",
+      "문제 : 문제2에요\n해답 : 해답2에요\n",
+      "문제 : 문제3입니다\n해답 : 해답3입니다\n"
+    ];
 
     for (var i = 0; i < QnAdic.length; i++) {
       String slicedString = '';
@@ -45,43 +53,41 @@ class _QuizScreenState extends State<QuizScreen> {
 
     return Scaffold(
       body: Center(
-        child: (taskModel.quizTexts == null || taskModel.quizTexts!.isEmpty)
-            ? const Text('생성중')
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text("Quiz page: ${taskModel.title}"),
-                  Text("Task Description: ${taskModel.description}"),
-                  ...taskModel.quizTexts!.map((text) => Text(text)).toList(),
-                  ExpansionTile(
-                    shape: const Border(),
-                    title: Text(QnAdic[0]['question']!),
-                    children: <Widget>[
-                      ListTile(
-                        title: Text(QnAdic[0]['answer']!),
-                      ),
-                    ],
-                  ),
-                  ExpansionTile(
-                    shape: const Border(),
-                    title: Text(QnAdic[1]['question']!),
-                    children: <Widget>[
-                      ListTile(
-                        title: Text(QnAdic[1]['answer']!),
-                      ),
-                    ],
-                  ),
-                  ExpansionTile(
-                    shape: const Border(),
-                    title: Text(QnAdic[2]['question']!),
-                    children: <Widget>[
-                      ListTile(
-                        title: Text(QnAdic[2]['answer']!),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+        //실제 실행 시 아래 주석 활성화
+        //child: (taskModel.quizTexts == null || taskModel.quizTexts!.isEmpty)
+        //? const Text('생성중') :
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ExpansionTile(
+              shape: const Border(),
+              title: Text(QnAdic[0]['question']!),
+              children: <Widget>[
+                ListTile(
+                  title: Text(QnAdic[0]['answer']!),
+                ),
+              ],
+            ),
+            ExpansionTile(
+              shape: const Border(),
+              title: Text(QnAdic[1]['question']!),
+              children: <Widget>[
+                ListTile(
+                  title: Text(QnAdic[1]['answer']!),
+                ),
+              ],
+            ),
+            ExpansionTile(
+              shape: const Border(),
+              title: Text(QnAdic[2]['question']!),
+              children: <Widget>[
+                ListTile(
+                  title: Text(QnAdic[2]['answer']!),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
