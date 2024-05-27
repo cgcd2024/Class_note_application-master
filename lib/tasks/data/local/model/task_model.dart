@@ -11,7 +11,6 @@ class TaskModel {
   List<String>? splitTranscribedTextsByContext;
   List<String>? summaryTexts; // 요약된 텍스트 리스트
   List<String>? quizTexts;
-  List<String>? describeTexts;
 
   TaskModel({
     required this.id,
@@ -25,7 +24,6 @@ class TaskModel {
     this.splitTranscribedTextsByContext,
     this.summaryTexts, // 기본값 null으로 설정
     this.quizTexts,
-    this.describeTexts,
   });
 
   TaskModel copyWith({
@@ -40,7 +38,6 @@ class TaskModel {
     List<String>? splitTranscribedTextsByContext,
     List<String>? summaryTexts,
     List<String>? quizTexts,
-    List<String>? describeTexts,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -54,7 +51,6 @@ class TaskModel {
       splitTranscribedTextsByContext: splitTranscribedTextsByContext ?? this.splitTranscribedTextsByContext,
       summaryTexts: summaryTexts ?? this.summaryTexts,
       quizTexts: quizTexts ?? this.quizTexts,
-      describeTexts: describeTexts ?? this.describeTexts,
     );
   }
 
@@ -70,8 +66,7 @@ class TaskModel {
       'transcribedTexts': transcribedTexts, // 리스트를 JSON 배열로 변환
       'splitTranscribedTextsByContext': splitTranscribedTextsByContext,
       'summaryTexts': summaryTexts,
-      'quizTexts': quizTexts,
-      'describeTexts':describeTexts
+      'quizTexts': quizTexts
     };
   }
 
@@ -91,9 +86,6 @@ class TaskModel {
         quizTexts: json['quizTexts'] != null
             ? List<String>.from(json['quizTexts'])
             : [],
-        describeTexts: json['describeTexts'] != null
-            ? List<String>.from(json['describeTexts'])
-            : [],
         splitTranscribedTextsByContext: json['splitTranscribedTextsByContext'] != null
             ? List<String>.from(json['splitTranscribedTextsByContext'])
             : [],
@@ -111,7 +103,6 @@ class TaskModel {
         'splitTranscribedTextsByContext: $splitTranscribedTextsByContext'
         'summaryTexts: $summaryTexts'
         'quizTexts: $quizTexts'
-        'describeTexts: $describeTexts'
         '}';
   }
 }
