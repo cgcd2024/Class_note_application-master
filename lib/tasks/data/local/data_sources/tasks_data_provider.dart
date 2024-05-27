@@ -153,22 +153,16 @@ class TaskDataProvider {
     taskModel.splitTranscribedTextsByContext=await _splitTranscribedTextByContext(taskModel.transcribedTexts);
 
     //text to summary 코드
-    // taskModel.summaryTexts?.add(await _summaryTasks(input: taskModel.transcribedTexts)); 이전코드
     taskModel.summaryTexts =
     await Future.wait(taskModel.splitTranscribedTextsByContext!.map((myString) async {
-      return await _quizTasks(input: myString);
+      return await _summaryTasks(input: myString);
     }).toList());
 
-    // summary to describe 코드
-    // taskModel.describeTexts?.add(await _summaryDescribeTasks(input: taskModel.summaryTexts!.first)); 이전 코드
-
-    //TODO transcribedTexts이 list<string> to string으로 바뀌었음으로, 수정바람
     // summary to quiz 코드
     taskModel.quizTexts =
     await Future.wait(taskModel.splitTranscribedTextsByContext!.map((myString) async {
       return await _quizTasks(input: myString);
     }).toList());
-    taskModel.quizTexts = (await _quizTasks(input: taskModel.transcribedTexts)) as List<String>?;
 
     // prefeb에 저장하는 코드
     tasks[tasks.indexWhere((element) => element.id == taskModel.id)] =
