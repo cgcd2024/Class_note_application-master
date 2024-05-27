@@ -57,12 +57,13 @@ class _QuizScreenState extends State<QuizScreen> {
     var beforeQuestionFin = true;
 
     for (var i = 0; i < quizText.length; i++) {
-      slicedString += quizText[i];
       if (quizText[i] == '\n' && beforeQuestionFin) {
         quizMap['question'] = slicedString;
         beforeQuestionFin = false;
         slicedString = '';
         //i += 5;
+      } else {
+        slicedString += quizText[i];
       }
       if (i == quizText.length - 1 && !beforeQuestionFin) {
         quizMap['answer'] = slicedString;
