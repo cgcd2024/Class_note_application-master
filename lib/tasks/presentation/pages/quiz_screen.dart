@@ -16,9 +16,6 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     final taskModel = widget.processedTasks;
 
-    //실제 실행 시 quizTexts 아래 코드로 넣기
-    //List<String> quizTexts = taskModel.quizTexts!.toList();
-
     //임시 리스트
     List<String> localQuizTexts = [
       "문제 : 문제1\n해답 : 해답1\n",
@@ -26,7 +23,10 @@ class _QuizScreenState extends State<QuizScreen> {
       "문제 : 문제3입니다\n해답 : 해답3입니다\n"
     ];
 
+    //실제 실행 시 지우기
     taskModel.quizTexts = localQuizTexts;
+    //실제 실행 시 활성화
+    //List<String> localQuizText = taskModel.quizTexts!.toList();
 
     return MaterialApp(
         home: Scaffold(
