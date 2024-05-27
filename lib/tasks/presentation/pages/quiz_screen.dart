@@ -17,16 +17,16 @@ class _QuizScreenState extends State<QuizScreen> {
     final taskModel = widget.processedTasks;
 
     //임시 리스트
-    List<String> localQuizTexts = [
+    List<String> quizTexts = [
       "문제 : 문제1\n해답 : 해답1\n",
       "문제 : 문제2에요\n해답 : 해답2에요\n",
       "문제 : 문제3입니다\n해답 : 해답3입니다\n"
     ];
 
     //실제 실행 시 지우기
-    taskModel.quizTexts = localQuizTexts;
+    taskModel.quizTexts = quizTexts;
     //실제 실행 시 활성화
-    //List<String> localQuizText = taskModel.quizTexts!.toList();
+    //List<String> quizText = taskModel.quizTexts!.toList();
 
     return MaterialApp(
         home: Scaffold(
@@ -41,10 +41,10 @@ class _QuizScreenState extends State<QuizScreen> {
                             const Divider(),
                             Expanded(
                               child: ListView.builder(
-                                  itemCount: localQuizTexts.length,
+                                  itemCount: quizTexts.length,
                                   itemBuilder: (context, index) {
                                     return quizWidget(
-                                        context, localQuizTexts[index]);
+                                        context, quizTexts[index]);
                                   }),
                             )
                           ]))));
@@ -57,19 +57,17 @@ class _QuizScreenState extends State<QuizScreen> {
     var beforeQuestionFin = true;
 
     for (var i = 5; i < quizText.length; i++) {
-      if (quizText[i] != '\n') {
-        slicedString += quizText[i];
-      } else {
-        if (beforeQuestionFin) {
-          quizMap['question'] = slicedString;
-          beforeQuestionFin = false;
-          slicedString = '';
-          i += 5;
-        } else {
-          quizMap['answer'] = slicedString;
-          beforeQuestionFin = true;
-          slicedString = '';
-        }
+      slicedString += quizText[i];
+      if (quizText[i] == '\n') {
+        quizMap['question'] = slicedString;
+        beforeQuestionFin = false;
+        slicedString = '';
+        i += 5;
+      }
+      if (i == quizText.length - 1 && !beforeQuestionFin) {
+        quizMap['answer'] = slicedString;
+        beforeQuestionFin = true;
+        slicedString = '';
       }
     }
 
