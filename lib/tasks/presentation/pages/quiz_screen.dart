@@ -56,13 +56,13 @@ class _QuizScreenState extends State<QuizScreen> {
     String slicedString = '';
     var beforeQuestionFin = true;
 
-    for (var i = 5; i < quizText.length; i++) {
+    for (var i = 0; i < quizText.length; i++) {
       slicedString += quizText[i];
-      if (quizText[i] == '\n') {
+      if (quizText[i] == '\n' && beforeQuestionFin) {
         quizMap['question'] = slicedString;
         beforeQuestionFin = false;
         slicedString = '';
-        i += 5;
+        //i += 5;
       }
       if (i == quizText.length - 1 && !beforeQuestionFin) {
         quizMap['answer'] = slicedString;
@@ -101,7 +101,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   Card(
                     child: Container(
                       padding: const EdgeInsets.all(8.0),
-                      child: Flexible(
+                      child: Expanded(
                         child: Text(quizMap['answer']!,
                             style: const TextStyle(fontSize: 16)),
                       ),
