@@ -1,9 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
 import '../../data/local/model/task_model.dart';
 
 class QuizScreen extends StatefulWidget {
