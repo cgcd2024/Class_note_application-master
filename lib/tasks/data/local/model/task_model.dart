@@ -8,6 +8,7 @@ class TaskModel {
   bool completed;
   // TODO (재현) : transcribedTexts nullable 해도 되는지?
   String transcribedTexts; // 변환된 텍스트 목록을 저장하는 리스트 추가
+  List<String>? splitTranscribedTextsByContext;
   List<String>? summaryTexts; // 요약된 텍스트 리스트
   List<String>? quizTexts;
   List<String>? describeTexts;
@@ -21,6 +22,7 @@ class TaskModel {
     // required this.stopDateTime,
     this.completed = false,
     this.transcribedTexts = '', // 기본값으로 빈 값
+    this.splitTranscribedTextsByContext,
     this.summaryTexts, // 기본값 null으로 설정
     this.quizTexts,
     this.describeTexts,
@@ -35,6 +37,7 @@ class TaskModel {
     // DateTime? stopDateTime,
     bool? completed,
     String? transcribedTexts,
+    List<String>? splitTranscribedTextsByContext,
     List<String>? summaryTexts,
     List<String>? quizTexts,
     List<String>? describeTexts,
@@ -48,6 +51,7 @@ class TaskModel {
       // stopDateTime: stopDateTime ?? this.stopDateTime,
       completed: completed ?? this.completed,
       transcribedTexts: transcribedTexts ?? this.transcribedTexts,
+      splitTranscribedTextsByContext: splitTranscribedTextsByContext ?? this.splitTranscribedTextsByContext,
       summaryTexts: summaryTexts ?? this.summaryTexts,
       quizTexts: quizTexts ?? this.quizTexts,
       describeTexts: describeTexts ?? this.describeTexts,
@@ -64,6 +68,7 @@ class TaskModel {
       // 'startDateTime': startDateTime?.toIso8601String(),
       // 'stopDateTime': stopDateTime?.toIso8601String(),
       'transcribedTexts': transcribedTexts, // 리스트를 JSON 배열로 변환
+      'splitTranscribedTextsByContext': splitTranscribedTextsByContext,
       'summaryTexts': summaryTexts,
       'quizTexts': quizTexts,
       'describeTexts':describeTexts
@@ -88,7 +93,10 @@ class TaskModel {
             : [],
         describeTexts: json['describeTexts'] != null
             ? List<String>.from(json['describeTexts'])
-            : []
+            : [],
+        splitTranscribedTextsByContext: json['splitTranscribedTextsByContext'] != null
+            ? List<String>.from(json['splitTranscribedTextsByContext'])
+            : [],
     );
 
   }
@@ -100,6 +108,7 @@ class TaskModel {
         // 'startDateTime: $startDateTime, stopDateTime: $stopDateTime, '
         'completed: $completed,'
         'transcribedTexts: $transcribedTexts'
+        'splitTranscribedTextsByContext: $splitTranscribedTextsByContext'
         'summaryTexts: $summaryTexts'
         'quizTexts: $quizTexts'
         'describeTexts: $describeTexts'

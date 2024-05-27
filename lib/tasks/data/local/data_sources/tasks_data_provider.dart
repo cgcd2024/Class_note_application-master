@@ -149,21 +149,28 @@ class TaskDataProvider {
   }
 
   Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
+    // 문백별로 나누는 코드
+    taskModel.splitTranscribedTextsByContext=await _splitTranscribedTextByContext(taskModel.transcribedTexts);
+
     //text to summary 코드
-    // TODO 일단 List<String> 형은 그대로 둔 상태에서 첫번째 인덱스에 값을 넣었음. 후에 어떻게 될지 몰라서
-    taskModel.summaryTexts?.add(await _summaryTasks(input: taskModel.transcribedTexts));
+    // taskModel.summaryTexts?.add(await _summaryTasks(input: taskModel.transcribedTexts)); 이전코드
+    taskModel.summaryTexts =
+    await Future.wait(taskModel.splitTranscribedTextsByContext!.map((myString) async {
+      return await _quizTasks(input: myString);
+    }).toList());
 
     // summary to describe 코드
-    taskModel.describeTexts?.add(await _summaryDescribeTasks(input: taskModel.summaryTexts!.first));
+    // taskModel.describeTexts?.add(await _summaryDescribeTasks(input: taskModel.summaryTexts!.first)); 이전 코드
 
     //TODO transcribedTexts이 list<string> to string으로 바뀌었음으로, 수정바람
-    //summary to quiz 코드
-    // taskModel.quizTexts =
-    // await Future.wait(taskModel.transcribedTexts.map((myString) async {
-    //   return await _quizTasks(input: myString);
-    // }).toList());
+    // summary to quiz 코드
+    taskModel.quizTexts =
+    await Future.wait(taskModel.splitTranscribedTextsByContext!.map((myString) async {
+      return await _quizTasks(input: myString);
+    }).toList());
     taskModel.quizTexts = (await _quizTasks(input: taskModel.transcribedTexts)) as List<String>?;
 
+    // prefeb에 저장하는 코드
     tasks[tasks.indexWhere((element) => element.id == taskModel.id)] =
         taskModel;
     final List<String> taskJsonList =
@@ -265,6 +272,63 @@ class TaskDataProvider {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       final summary = decoded['choices'][0]['message']['content'] as String;
       return summary;
+    } else {
+      throw Exception('Failed to summarize text');
+    }
+  }
+
+  // TODO 통짜 스트링 문맥별로 나누는 것
+  Future<List<String>> _splitTranscribedTextByContext(String text) async {
+    List<String> splitHalfList=_splitTextHalf(text);
+    logger.v(splitHalfList);
+
+    List<String> splitByContextList =
+    await Future.wait(splitHalfList.map((myString) async {
+      return await _splitTextByContextUsingGPT(input: myString);
+    }).toList());
+    String splitByContext=splitByContextList.join("");
+    splitByContext=splitByContext.replaceAll("\n","");
+
+    List<String> result=splitByContext.split('#');
+    return result;
+  }
+
+// TODO 스트링 반갈
+  List<String> _splitTextHalf(String text){
+    List<String> result=[];
+    var tempIndex=text.lastIndexOf('. ',(text.length/2).toInt());
+    result.add(text.substring(0,tempIndex+2));
+    result.add(text.substring(tempIndex+2));
+    return result;
+  }
+
+// TODO 문맥별 나누기
+  Future<String> _splitTextByContextUsingGPT({required String input}) async {
+    final apiKey = dotenv.env['API_KEY'];
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
+
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      },
+      body: jsonEncode({
+        'model': 'gpt-3.5-turbo',
+        "messages": [
+          {"role": "system", "content": "이 글을 문맥별로 나누어주세요. 문맥 사이에는 # 기호를 넣어주세요."},
+          {"role": "user", "content": input}
+        ]
+        // 'max_tokens': 50, // Adjust the summary length as needed
+      }),
+    );
+    logger.i('openai response: '
+        '${utf8.decode(response.bodyBytes)}');
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      final quiz = decoded['choices'][0]['message']['content'] as String;
+      return quiz;
     } else {
       throw Exception('Failed to summarize text');
     }

@@ -9,8 +9,6 @@ import 'package:task_manager_app/tasks/data/repository/task_repository.dart';
 import 'package:task_manager_app/tasks/presentation/bloc/tasks_bloc.dart';
 import 'package:task_manager_app/utils/color_palette.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import 'dart:convert';
 import 'dart:html' show AnchorElement;
 import 'dart:convert' show utf8;
@@ -53,7 +51,7 @@ Future<List<String>> _splitTranscribedTextByContext(String text) async {
   return result;
 }
 
-// TODO 스티링 반갈
+// TODO 스트링 반갈
 List<String> _splitTextHalf(String text){
   List<String> result=[];
   var tempIndex=text.lastIndexOf('. ',(text.length/2).toInt());
