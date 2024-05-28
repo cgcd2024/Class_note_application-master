@@ -36,8 +36,11 @@ class Message extends StatelessWidget{
               reverse: true,
               itemCount: text.data,
               itemBuilder: (context, index){
-                Logger().w(index);
-                return ChatBubbles(processedTasks.summaryTexts!.reversed.toList()[index].toString(),true,"username");
+                String temp=processedTasks.summaryTexts!.reversed.toList()[index].toString();
+                var tempIndex=temp.indexOf('@');
+                String user=temp.substring(0,tempIndex);
+                String message=temp.substring(tempIndex+1);
+                return ChatBubbles(message,user=="user",user);
               }
           );
         }

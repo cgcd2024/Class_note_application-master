@@ -29,7 +29,7 @@ class ChatBubbles extends StatelessWidget {
                       crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                       children: [
                         Text(
-                            userName,
+                            "사용자",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -57,7 +57,7 @@ class ChatBubbles extends StatelessWidget {
                     crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
                       Text(
-                        userName,
+                        "GPT",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
