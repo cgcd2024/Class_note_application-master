@@ -3,6 +3,13 @@ part of 'tasks_bloc.dart';
 @immutable
 sealed class TasksEvent {}
 
+class StartProcessing extends TasksEvent {
+}
+
+class SuccessProcess extends TasksEvent {
+
+}
+
 //UploadVoiceFile 이벤트 선언
 class UploadVoiceFile extends TasksEvent {
   final TaskModel taskModel;

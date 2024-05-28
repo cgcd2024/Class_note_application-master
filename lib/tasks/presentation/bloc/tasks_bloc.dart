@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,18 +21,30 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     on<SortTaskEvent>(_sortTasks);
     on<SearchTaskEvent>(_searchTasks);
     on<UploadVoiceFile>(_uploadVoiceFile);
+    on<StartProcessing>(_startProcessing);
+    on<SuccessProcess>(_successProcess);
+  }
+
+  Future<void> _successProcess(SuccessProcess event, Emitter<TasksState> emit) async {
+    emit(ProcessSuccessed());
+  }
+
+  Future<void> _startProcessing(StartProcessing event, Emitter<TasksState> emit) async {
+    emit(ProcessLoading());
   }
 
   //_uploadVoiceFile이 되면, processtask를 싫행함
   _uploadVoiceFile(UploadVoiceFile event, Emitter<TasksState> emit) async {
-    emit(TasksLoading());
     try {
-      TaskModel processedTasks = (await taskRepository.processTasks(event.taskModel)) as TaskModel;
-      emit(VoiceFileUploadSuccess(processedTasks: processedTasks));
+      List<TaskModel> processedTasks = await taskRepository.processTasks(event.taskModel);
+      emit(TasksLoading());
+      //Todo processed -> fetch
+      return emit(FetchTasksSuccess(tasks: processedTasks));
     } catch (exception) {
       emit(VoiceFileUploadFailure(exception.toString()));
     }
   }
+
 
   _addNewTask(AddNewTaskEvent event, Emitter<TasksState> emit) async {
     emit(TasksLoading());

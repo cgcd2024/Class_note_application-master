@@ -36,16 +36,15 @@ class UpdateTaskFailure extends TasksState {
 
 class UpdateTaskSuccess extends TasksState {}
 
-// VoiceFileUploadSuccess 성공시 이벤트 처리
-class VoiceFileUploadSuccess extends TasksState {
+class VoiceFileUploaded extends TasksState {
   final TaskModel processedTasks;
 
-  VoiceFileUploadSuccess({required this.processedTasks});
-
-  TaskModel getProcessedTasks() {
-    return processedTasks;
-  }
+  VoiceFileUploaded({required this.processedTasks});
 }
+
+class ProcessSuccessed extends TasksState {}
+
+class ProcessLoading extends TasksState {}
 
 // 실패시 처리코드
 class VoiceFileUploadFailure extends TasksState {

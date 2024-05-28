@@ -41,7 +41,7 @@ class _TasksScreenState extends State<TasksScreen> {
             child: Scaffold(
           backgroundColor: kWhiteColor,
           appBar: CustomAppBar(
-            title: '앱 이름',
+            title: 'CLASS NOTE',
             showBackArrow: false,
             actionWidgets: [
               PopupMenuButton<int>(
@@ -109,7 +109,7 @@ class _TasksScreenState extends State<TasksScreen> {
                             width: 10,
                           ),
                           buildText(
-                              '완료된 일',
+                              '완료된 수업',
                               kBlackColor,
                               textSmall,
                               FontWeight.normal,
@@ -130,7 +130,7 @@ class _TasksScreenState extends State<TasksScreen> {
                             width: 10,
                           ),
                           buildText(
-                              '진행중 일',
+                              '진행중 수업',
                               kBlackColor,
                               textSmall,
                               FontWeight.normal,
@@ -187,7 +187,7 @@ class _TasksScreenState extends State<TasksScreen> {
                           ? Column(
                               children: [
                                 BuildTextField(
-                                    hint: "기록 검색하기",
+                                    hint: "수업 검색하기",
                                     controller: searchController,
                                     inputType: TextInputType.text,
                                     prefixIcon: const Icon(
@@ -247,7 +247,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                     height: 50,
                                   ),
                                   buildText(
-                                      '할일 등록하기',
+                                      '수업 등록하기',
                                       kBlackColor,
                                       textBold,
                                       FontWeight.w600,

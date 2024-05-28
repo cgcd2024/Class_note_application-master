@@ -72,23 +72,23 @@ class TaskModel {
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     return TaskModel(
-        id: json['id'],
-        title: json['title'],
-        description: json['description'],
-        completed: json['completed'],
-        makeDateTime: DateTime.parse(json['makeDateTime']),
-        // startDateTime: DateTime.parse(json['startDateTime']),
-        // stopDateTime: DateTime.parse(json['stopDateTime']),
-        transcribedTexts: json['transcribedTexts'] ?? '', // JSON에서 문자열로 변환
-        summaryTexts: json['summaryTexts'] != null
-            ? List<String>.from(json['summaryTexts'])
-            : [],
-        quizTexts: json['quizTexts'] != null
-            ? List<String>.from(json['quizTexts'])
-            : [],
-        splitTranscribedTextsByContext: json['splitTranscribedTextsByContext'] != null
-            ? List<String>.from(json['splitTranscribedTextsByContext'])
-            : [],
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      completed: json['completed'],
+      makeDateTime: DateTime.parse(json['makeDateTime']),
+      // startDateTime: DateTime.parse(json['startDateTime']),
+      // stopDateTime: DateTime.parse(json['stopDateTime']),
+      transcribedTexts: json['transcribedTexts'] ?? '', // JSON에서 문자열로 변환
+      summaryTexts: json['summaryTexts'] != null
+          ? List<String>.from(json['summaryTexts'])
+          : [],
+      quizTexts: json['quizTexts'] != null
+          ? List<String>.from(json['quizTexts'])
+          : [],
+      splitTranscribedTextsByContext: json['splitTranscribedTextsByContext'] != null
+          ? List<String>.from(json['splitTranscribedTextsByContext'])
+          : [],
     );
 
   }
@@ -97,7 +97,7 @@ class TaskModel {
   String toString() {
     return 'TaskModel{id: $id, title: $title, description: $description, '
         'makeDateTime: $makeDateTime,'
-        // 'startDateTime: $startDateTime, stopDateTime: $stopDateTime, '
+    // 'startDateTime: $startDateTime, stopDateTime: $stopDateTime, '
         'completed: $completed,'
         'transcribedTexts: $transcribedTexts'
         'splitTranscribedTextsByContext: $splitTranscribedTextsByContext'

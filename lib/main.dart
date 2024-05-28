@@ -9,9 +9,6 @@ import 'package:task_manager_app/tasks/data/repository/task_repository.dart';
 import 'package:task_manager_app/tasks/presentation/bloc/tasks_bloc.dart';
 import 'package:task_manager_app/utils/color_palette.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:convert';
-import 'dart:html' show AnchorElement;
-import 'dart:convert' show utf8;
 
 
 Future<void> main() async {
@@ -41,45 +38,36 @@ class _CounterState extends State<Counter> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-      appBar: AppBar(
-        title: const Text('Stream builder'),
-      ),
-      body: StreamBuilder<int>(
-        initialData: price, //0. 초기 값 : 2000
-        stream: addStreamValue(), //1. addStreamValue로 새로운 데이터가 들어 올때마다
-        builder: (context, snapshot) {
-          //2. snapshot 에 저장하고 builder 메소드를 통해 새로운 데이터로 화면에 갱신
-          final priceNum = snapshot.data.toString();
-          return Center(
-            child: Text(
-              priceNum,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 40,
-                color: Colors.blue,
-              ),
-            ),
-          );
-        },
-      ),
-    )
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Stream builder'),
+          ),
+          body: StreamBuilder<int>(
+            initialData: price, //0. 초기 값 : 2000
+            stream: addStreamValue(), //1. addStreamValue로 새로운 데이터가 들어 올때마다
+            builder: (context, snapshot) {
+              //2. snapshot 에 저장하고 builder 메소드를 통해 새로운 데이터로 화면에 갱신
+              final priceNum = snapshot.data.toString();
+              return Center(
+                child: Text(
+                  priceNum,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 40,
+                    color: Colors.blue,
+                  ),
+                ),
+              );
+            },
+          ),
+        )
     );
   }
 
   Stream<int> addStreamValue() {
     return Stream<int>.periodic(
-        Duration(seconds: 1), (counter) => price + counter);
+        const Duration(seconds: 1), (counter) => price + counter);
   }
-}
-
-// TODO text파일로 저장하는 메소드
-void saveTextFile(String text, String filename) {
-  AnchorElement()
-    ..href = '${Uri.dataFromString(text, mimeType: 'text/plain', encoding: utf8)}'
-    ..download = filename
-    ..style.display = 'none'
-    ..click();
 }
 
 class MyApp extends StatelessWidget {

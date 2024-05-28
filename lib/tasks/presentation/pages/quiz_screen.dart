@@ -1,5 +1,3 @@
-// ignore_for_file: non_constant_identifier_names
-
 import 'package:flutter/material.dart';
 import '../../data/local/model/task_model.dart';
 
@@ -16,38 +14,31 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     final taskModel = widget.processedTasks;
 
-    //임시 리스트
-    List<String> quizTexts = [
-      "문제 : 문제1\n해답 : 해답1\n",
-      "문제 : 문제2에요\n해답 : 해답2에요\n",
-      "문제 : 문제3입니다\n해답 : 해답3입니다\n"
-    ];
+    List<String> quizTexts = taskModel.quizTexts!.toList();
 
-    //실제 실행 시 지우기
-    taskModel.quizTexts = quizTexts;
-    //실제 실행 시 활성화
-    //List<String> quizText = taskModel.quizTexts!.toList();
-
-    return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(title: const Text('QnA')),
-            body: Center(
-                child: (taskModel.quizTexts == null ||
-                        taskModel.quizTexts!.isEmpty)
-                    ? const Text('생성중')
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                            const Divider(),
-                            Expanded(
-                              child: ListView.builder(
-                                  itemCount: quizTexts.length,
-                                  itemBuilder: (context, index) {
-                                    return quizWidget(
-                                        context, quizTexts[index]);
-                                  }),
-                            )
-                          ]))));
+    return Scaffold(
+      body: Center(
+        child: (taskModel.quizTexts == null ||
+            taskModel.quizTexts!.isEmpty)
+            ? const Text('생성중')
+            : SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Divider(),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: quizTexts.length,
+                itemBuilder: (context, index) {
+                  return quizWidget(context, quizTexts[index]);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget quizWidget(BuildContext context, String quizText) {
@@ -57,13 +48,12 @@ class _QuizScreenState extends State<QuizScreen> {
     var beforeQuestionFin = true;
 
     for (var i = 0; i < quizText.length; i++) {
+      slicedString += quizText[i];
       if (quizText[i] == '\n' && beforeQuestionFin) {
         quizMap['question'] = slicedString;
         beforeQuestionFin = false;
         slicedString = '';
         //i += 5;
-      } else {
-        slicedString += quizText[i];
       }
       if (i == quizText.length - 1 && !beforeQuestionFin) {
         quizMap['answer'] = slicedString;
@@ -80,35 +70,41 @@ class _QuizScreenState extends State<QuizScreen> {
           title: Row(
             children: [
               Container(
-                  margin: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                  child: const Text(
-                    'Q.',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  )),
+                margin: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                child: const Text(
+                  'Q.',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
               const SizedBox(width: 15),
               Flexible(child: Text(quizMap['question']!)),
             ],
           ),
           children: <Widget>[
             Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 5.0, 0.0, 5.0),
-                child: Row(children: [
-                  Container(
-                      margin: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
-                      child: const Text('A.',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold))),
-                  const SizedBox(width: 15),
-                  Card(
-                    child: Container(
+              padding: const EdgeInsets.fromLTRB(16.0, 5.0, 0.0, 5.0),
+              child: Row(children: [
+                Container(
+                    margin: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
+                    child: const Text('A.',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold))),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Card(
+                    child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Expanded(
-                        child: Text(quizMap['answer']!,
-                            style: const TextStyle(fontSize: 16)),
+                      child: Text(
+                        quizMap['answer']!,
+                        style: const TextStyle(fontSize: 16),
+                        softWrap: true, // 줄 바꿈 허용
+                        maxLines: 10, // 최대 줄 수 설정
                       ),
                     ),
                   ),
-                ])),
+                ),
+              ]),
+            ),
           ],
         ),
         const Divider(),

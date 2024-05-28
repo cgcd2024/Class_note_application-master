@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -195,12 +196,14 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
               '${widget.taskModel.transcribedTexts}\n$transcribedText'.trim();
           TaskModel updatedTaskModel = widget.taskModel
               .copyWith(transcribedTexts: updatedTranscribedTexts);
-          context
-              .read<TasksBloc>()
-              .add(UpdateTaskEvent(taskModel: updatedTaskModel));
-          context
-              .read<TasksBloc>()
-              .add(UploadVoiceFile(taskModel: updatedTaskModel));
+          setState(() {
+            context
+                .read<TasksBloc>()
+                .add(UploadVoiceFile(taskModel: updatedTaskModel));
+            context
+                .read<TasksBloc>()
+                .add(UpdateTaskEvent(taskModel: updatedTaskModel));
+          });
           setState(() {
             text = transcribedText;
           });
@@ -238,7 +241,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     final taskModel = widget.taskModel;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('앱 이름'),
+        title: const Text(''),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -256,61 +259,16 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         onPageChanged: _onPageChanged,
         children: [
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text("Task Title: ${taskModel.title}"),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _isRecording ? stopRecording : startRecording,
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    backgroundColor: _isRecording ? Colors.red : Colors.white,
-                    minimumSize: const Size(200, 200),
-                    padding: const EdgeInsets.all(20),
-                  ),
-                  child: Icon(
-                    _isRecording ? Icons.stop : Icons.mic,
-                    size: 100,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                    'Recording Status: ${_isRecording ? "Recording..." : "Stopped"}'),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    FilePickerResult? result =
-                        await FilePicker.platform.pickFiles();
-                    if (result != null && result.files.isNotEmpty) {
-                      String filePath = result.files.single.path!;
-                      if (path.extension(filePath).toLowerCase() == '.m4a') {
-                        filePath = await convertM4aToMp3(filePath);
-                      }
-                      try {
-                        String transcribedText = await convertSpeechToText(filePath);
-                        TaskModel updatedTaskModel = widget.taskModel.copyWith(
-                            transcribedTexts: transcribedText);
-                        print(updatedTaskModel);
-                        context.read<TasksBloc>().add(UploadVoiceFile(taskModel: updatedTaskModel));
-                        context.read<TasksBloc>().add(UpdateTaskEvent(taskModel: updatedTaskModel));
-                      } catch (e) {
-                        logger.e('음성을 텍스트로 변환하는 중 오류가 발생했습니다: $e');
-                      }
-                    } else {
-                      logger.e('파일을 선택하지 않았습니다.');
-                    }
-                  },
-                  child: const Text('Upload'),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Text(taskModel.transcribedTexts),
-                  ),
-                ),
-              ],
+            child: BlocBuilder<TasksBloc, TasksState>(
+              builder: (context, state) {
+                if (state is FetchTasksSuccess && widget.taskModel.transcribedTexts == '') {
+                  return _buildInitialUI();
+                } else if (state is ProcessLoading) {
+                  return _buildLoadingUI();
+                } else {
+                  return _buildUploadedUI();
+                }
+              },
             ),
           ),
           SummaryScreen(processedTasks: taskModel),
@@ -340,4 +298,83 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       ),
     );
   }
+
+  Widget _buildInitialUI() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text("수업명 : ${widget.taskModel.title}"),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: _isRecording ? stopRecording : startRecording,
+          style: ElevatedButton.styleFrom(
+            shape: const CircleBorder(),
+            backgroundColor: _isRecording ? Colors.red : Colors.white,
+            minimumSize: const Size(200, 200),
+            padding: const EdgeInsets.all(20),
+          ),
+          child: Icon(
+            _isRecording ? Icons.stop : Icons.mic,
+            size: 100,
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(_isRecording ? "녹음중입니다" : "녹음중이 아닙니다"),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () async {
+            FilePickerResult? result = await FilePicker.platform.pickFiles();
+            if (result != null && result.files.isNotEmpty) {
+              setState(() {
+                context
+                    .read<TasksBloc>()
+                    .add(StartProcessing());
+              });
+              String filePath = result.files.single.path!;
+              if (path.extension(filePath).toLowerCase() == '.m4a') {
+                filePath = await convertM4aToMp3(filePath);
+              }
+              try {
+                String transcribedText = await convertSpeechToText(filePath);
+                TaskModel updatedTaskModel = widget.taskModel.copyWith(transcribedTexts: transcribedText);
+                setState(() {
+                  context
+                      .read<TasksBloc>()
+                      .add(UploadVoiceFile(taskModel: updatedTaskModel));
+                });
+              } catch (e) {
+                logger.e('음성을 텍스트로 변환하는 중 오류가 발생했습니다: $e');
+              }
+            } else {
+              logger.e('파일을 선택하지 않았습니다.');
+            }
+          },
+          child: const Text('Upload'),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _buildLoadingUI() {
+    return const Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        CircularProgressIndicator(),
+        SizedBox(height: 20),
+        Text('번역 생성중...!!'),
+      ],
+    );
+  }
+
+  Widget _buildUploadedUI() {
+    return const Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text('summary 와 quiz 탭에서 유용한 정보를 받아보세요!'),
+      ],
+    );
+  }
 }
+
