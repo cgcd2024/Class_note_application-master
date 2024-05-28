@@ -54,6 +54,9 @@ dependencies:
   bloc_concurrency: ^0.2.3
   shared_preferences: ^2.2.2
   logger: ^1.4.0
+  flutter_chat_bubble: ^2.0.2
+  chat_gpt_flutter: ^1.0.16
+  chatgpt_completions: ^1.0.4
 
 dev_dependencies:
   flutter_test:

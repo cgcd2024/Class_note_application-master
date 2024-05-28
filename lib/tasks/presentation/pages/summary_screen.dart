@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:task_manager_app/tasks/presentation/pages/summary_screen_chat/message.dart';
+import 'package:task_manager_app/tasks/presentation/pages/summary_screen_chat/new_message.dart';
 import '../../data/local/model/task_model.dart';
+import 'dart:async';
+
 
 class SummaryScreen extends StatefulWidget {
   final TaskModel processedTasks;
@@ -29,32 +33,42 @@ class _SummaryScreenState extends State<SummaryScreen> {
     "AI 챗봇은 자연어 처리 기술로 사용자와 대화하며 다양한 정보를 제공합니다.",
     "AI 챗봇은 자연어 처리 기술로 사용자와 대화하며 다양한 정보를 제공합니다.",
   ];
-
+  final streamController = StreamController();
 
   @override
   Widget build(BuildContext context) {
     final taskModel = widget.processedTasks;
 
     // TODO 실제 동작할 때에는 이 코드 제거
-    taskModel.summaryTexts = sentences;
+    // taskModel.summaryTexts = sentences;
 
     return Scaffold(
-      body: Center(
-        child: (taskModel.summaryTexts == null ||
-            taskModel.summaryTexts!.isEmpty)
-            ? const Text('생성중')
-            : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Expanded(
-              child: ListView.builder(
-                  itemCount: sentences.length,
-                  itemBuilder: (context, index) {
-                    return summaryText(context,sentences[index]);
-                  }
-              )
-          )
-        ]
+      body: Container(
+        child: Column(
+          children: [
+            Expanded(
+                child: Message(processedTasks: taskModel, streamController: streamController,)
+            ),
+            NewMessage(processedTasks: taskModel,streamController: streamController,),
+          ],
         ),
-      ),
+      )
+      // Center(
+      //   child: (taskModel.summaryTexts == null ||
+      //       taskModel.summaryTexts!.isEmpty)
+      //       ? const Text('생성중')
+      //       : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      //     Expanded(
+      //         child: ListView.builder(
+      //             itemCount: sentences.length,
+      //             itemBuilder: (context, index) {
+      //               return chatBubble(context,sentences[index]);
+      //             }
+      //         )
+      //     )
+      //   ]
+      //   ),
+      // ),
     );
   }
 
