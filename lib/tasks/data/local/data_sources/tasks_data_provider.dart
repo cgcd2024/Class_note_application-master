@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
-import 'package:task_manager_app/utils/exception_handler.dart';
+import 'package:class_note/tasks/data/local/model/task_model.dart';
+import 'package:class_note/utils/exception_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';

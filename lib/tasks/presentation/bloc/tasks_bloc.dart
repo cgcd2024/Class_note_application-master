@@ -36,10 +36,10 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   //_uploadVoiceFile이 되면, processtask를 싫행함
   _uploadVoiceFile(UploadVoiceFile event, Emitter<TasksState> emit) async {
     try {
-      List<TaskModel> processedTasks = await taskRepository.processTasks(event.taskModel);
+      final processedTasks = await taskRepository.processTasks(event.taskModel);
       emit(TasksLoading());
-      //Todo processed -> fetch
-      return emit(FetchTasksSuccess(tasks: processedTasks));
+      emit(FetchTasksSuccess(tasks: processedTasks));
+      emit(TasksLoading());
     } catch (exception) {
       emit(VoiceFileUploadFailure(exception.toString()));
     }
@@ -103,7 +103,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       // }
       emit(TasksLoading());
       final tasks = await taskRepository.updateTask(event.taskModel);
-      emit(UpdateTaskSuccess());
+      emit(VoiceFileUploaded(processedTasks: tasks));
       return emit(FetchTasksSuccess(tasks: tasks));
     } catch (exception) {
       emit(UpdateTaskFailure(error: exception.toString()));

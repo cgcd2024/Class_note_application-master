@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
+import 'package:class_note/tasks/data/local/model/task_model.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;

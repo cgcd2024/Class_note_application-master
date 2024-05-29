@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager_app/tasks/presentation/pages/summary_screen_chat/message.dart';
-import 'package:task_manager_app/tasks/presentation/pages/summary_screen_chat/new_message.dart';
+import 'package:class_note/tasks/presentation/pages/summary_screen_chat/message.dart';
+import 'package:class_note/tasks/presentation/pages/summary_screen_chat/new_message.dart';
 import '../../data/local/model/task_model.dart';
 import 'dart:async';
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:task_manager_app/routes/pages.dart';
-import 'package:task_manager_app/splash_screen.dart';
-import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
-import 'package:task_manager_app/tasks/presentation/pages/new_task_screen.dart';
-import 'package:task_manager_app/tasks/presentation/pages/tasks_screen.dart';
-import 'package:task_manager_app/tasks/presentation/pages/update_task_screen.dart';
-import 'package:task_manager_app/tasks/presentation/pages/upload_voice_screen.dart';
+import 'package:class_note/routes/pages.dart';
+import 'package:class_note/splash_screen.dart';
+import 'package:class_note/tasks/data/local/model/task_model.dart';
+import 'package:class_note/tasks/presentation/pages/new_task_screen.dart';
+import 'package:class_note/tasks/presentation/pages/tasks_screen.dart';
+import 'package:class_note/tasks/presentation/pages/update_task_screen.dart';
+import 'package:class_note/tasks/presentation/pages/upload_voice_screen.dart';
 
 import '../page_not_found.dart';
 

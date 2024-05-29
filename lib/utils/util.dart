@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:task_manager_app/utils/font_sizes.dart';
+import 'package:class_note/utils/font_sizes.dart';
 
 DateTime toDate({required String dateTime}) {
   final utcDateTime = DateTime.parse(dateTime);

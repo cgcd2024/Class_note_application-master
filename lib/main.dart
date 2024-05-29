@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:task_manager_app/routes/app_router.dart';
-import 'package:task_manager_app/bloc_state_observer.dart';
-import 'package:task_manager_app/routes/pages.dart';
-import 'package:task_manager_app/tasks/data/local/data_sources/tasks_data_provider.dart';
-import 'package:task_manager_app/tasks/data/repository/task_repository.dart';
-import 'package:task_manager_app/tasks/presentation/bloc/tasks_bloc.dart';
-import 'package:task_manager_app/utils/color_palette.dart';
+import 'package:class_note/routes/app_router.dart';
+import 'package:class_note/bloc_state_observer.dart';
+import 'package:class_note/routes/pages.dart';
+import 'package:class_note/tasks/data/local/data_sources/tasks_data_provider.dart';
+import 'package:class_note/tasks/data/repository/task_repository.dart';
+import 'package:class_note/tasks/presentation/bloc/tasks_bloc.dart';
+import 'package:class_note/utils/color_palette.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 

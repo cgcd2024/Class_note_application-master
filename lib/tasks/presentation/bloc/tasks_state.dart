@@ -37,7 +37,7 @@ class UpdateTaskFailure extends TasksState {
 class UpdateTaskSuccess extends TasksState {}
 
 class VoiceFileUploaded extends TasksState {
-  final TaskModel processedTasks;
+  final List<TaskModel> processedTasks;
 
   VoiceFileUploaded({required this.processedTasks});
 }

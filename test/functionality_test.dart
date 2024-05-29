@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:task_manager_app/tasks/data/local/data_sources/tasks_data_provider.dart';
-import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
+import 'package:class_note/tasks/data/local/data_sources/tasks_data_provider.dart';
+import 'package:class_note/tasks/data/local/model/task_model.dart';
 
 class MockDataProvider extends Mock implements TaskDataProvider {}
 

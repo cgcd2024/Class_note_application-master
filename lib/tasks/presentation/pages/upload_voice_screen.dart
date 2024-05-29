@@ -8,12 +8,12 @@ import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:task_manager_app/tasks/data/local/model/task_model.dart';
+import 'package:class_note/tasks/data/local/model/task_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:task_manager_app/tasks/presentation/pages/quiz_screen.dart';
-import 'package:task_manager_app/tasks/presentation/pages/summary_screen.dart';
-import 'package:task_manager_app/tasks/presentation/pages/tasks_screen.dart';
+import 'package:class_note/tasks/presentation/pages/quiz_screen.dart';
+import 'package:class_note/tasks/presentation/pages/summary_screen.dart';
+import 'package:class_note/tasks/presentation/pages/tasks_screen.dart';
 import '../../data/local/data_sources/tasks_data_provider.dart';
 import '../bloc/tasks_bloc.dart';
 import 'package:path/path.dart' as path;
@@ -261,7 +261,8 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
           Center(
             child: BlocBuilder<TasksBloc, TasksState>(
               builder: (context, state) {
-                if (state is FetchTasksSuccess && widget.taskModel.transcribedTexts == '') {
+                if (state is FetchTasksSuccess &&
+                    widget.taskModel.transcribedTexts == '') {
                   return _buildInitialUI();
                 } else if (state is ProcessLoading) {
                   return _buildLoadingUI();
@@ -298,6 +299,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       ),
     );
   }
+
 
   Widget _buildInitialUI() {
     return Column(
