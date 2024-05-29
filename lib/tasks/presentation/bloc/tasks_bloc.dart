@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,24 +20,28 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     on<SearchTaskEvent>(_searchTasks);
     on<UploadVoiceFile>(_uploadVoiceFile);
     on<StartProcessing>(_startProcessing);
-    on<SuccessProcess>(_successProcess);
+    // on<SuccessProcess>(_successProcess);
   }
 
-  Future<void> _successProcess(SuccessProcess event, Emitter<TasksState> emit) async {
-    emit(ProcessSuccessed());
-  }
+  // _successProcess(SuccessProcess event, Emitter<TasksState> emit) async {
+  //   return emit(ProcessSuccessed());
+  // }
 
-  Future<void> _startProcessing(StartProcessing event, Emitter<TasksState> emit) async {
-    emit(ProcessLoading());
+  _startProcessing(StartProcessing event, Emitter<TasksState> emit) async {
+    return emit(ProcessLoading());
   }
 
   //_uploadVoiceFile이 되면, processtask를 싫행함
   _uploadVoiceFile(UploadVoiceFile event, Emitter<TasksState> emit) async {
+    emit(TasksLoading());
     try {
       final processedTasks = await taskRepository.processTasks(event.taskModel);
-      emit(TasksLoading());
-      emit(FetchTasksSuccess(tasks: processedTasks));
-      emit(TasksLoading());
+      print(event.taskModel.id);
+      //Todo processedTasks to Taskmodel
+      final updatedProcessedTasks = await taskRepository.updateTask(processedTasks);
+      print (updatedProcessedTasks);
+      print(updatedProcessedTasks.runtimeType);
+      return emit(VoiceFileUploaded(processedTasks: updatedProcessedTasks));
     } catch (exception) {
       emit(VoiceFileUploadFailure(exception.toString()));
     }

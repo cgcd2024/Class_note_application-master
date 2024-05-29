@@ -148,7 +148,7 @@ class TaskDataProvider {
     }).toList();
   }
 
-  Future<List<TaskModel>> processTasks(TaskModel taskModel) async {
+  Future<TaskModel> processTasks(TaskModel taskModel) async {
     // 문백별로 나누는 코드
     taskModel.splitTranscribedTextsByContext=await _splitTranscribedTextByContext(taskModel.transcribedTexts);
 
@@ -165,12 +165,8 @@ class TaskDataProvider {
     }).toList());
 
     // prefeb에 저장하는 코드
-    tasks[tasks.indexWhere((element) => element.id == taskModel.id)] =
-        taskModel;
-    final List<String> taskJsonList =
-    tasks.map((task) => json.encode(task.toJson())).toList();
-    prefs!.setStringList(Constants.taskKey, taskJsonList);
-    return tasks;
+
+    return taskModel;
   }
 
   Future<String> _quizTasks({required String input}) async {

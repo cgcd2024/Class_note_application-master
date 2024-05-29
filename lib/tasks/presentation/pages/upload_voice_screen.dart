@@ -239,6 +239,8 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   @override
   Widget build(BuildContext context) {
     final taskModel = widget.taskModel;
+    var id = widget.taskModel.id;
+    logger.e(id);
     return Scaffold(
       appBar: AppBar(
         title: const Text(''),
@@ -264,9 +266,12 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                 if (state is FetchTasksSuccess &&
                     widget.taskModel.transcribedTexts == '') {
                   return _buildInitialUI();
-                } else if (state is ProcessLoading) {
+                } else if (state is ProcessLoading || state is TasksLoading) {
                   return _buildLoadingUI();
-                } else {
+                } else if (state is VoiceFileUploaded) {
+                  return _buildUploadedUI();
+                }
+                else {
                   return _buildUploadedUI();
                 }
               },
