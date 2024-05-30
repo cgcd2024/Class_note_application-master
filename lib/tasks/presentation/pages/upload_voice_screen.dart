@@ -1,19 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:io';
+import 'package:class_note/tasks/presentation/pages/upload_voice/process_voicefile.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:class_note/tasks/data/local/model/task_model.dart';
-import 'package:http/http.dart' as http;
-import 'package:permission_handler/permission_handler.dart';
 import 'package:class_note/tasks/presentation/pages/quiz_screen.dart';
 import 'package:class_note/tasks/presentation/pages/summary_screen.dart';
 import 'package:class_note/tasks/presentation/pages/tasks_screen.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../data/local/data_sources/tasks_data_provider.dart';
 import '../bloc/tasks_bloc.dart';
 import 'package:path/path.dart' as path;
@@ -29,7 +25,6 @@ class UploadVoiceScreen extends StatefulWidget {
 }
 
 class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
-  var text = "";
   FlutterSoundRecorder? _recorder;
   bool _isRecording = false;
   bool _isRecorderInitialized = false;
@@ -48,102 +43,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       _recorder = FlutterSoundRecorder();
       initRecorder();
     });
-  }
-
-  Future<String> convertSpeechToText(String filePath) async {
-    const maxFileSize = 25 * 1024 * 1024;
-    const sliceSize = 20 * 1024 * 1024;
-    final file = File(filePath);
-    final fileSize = await file.length();
-
-    if (fileSize <= maxFileSize) {
-      return await processFile(filePath);
-    } else {
-      String transcribedText = '';
-      int start = 0;
-      while (start < fileSize) {
-        int end = (start + sliceSize < fileSize) ? start + sliceSize : fileSize;
-        String slicePath =
-            '${path.dirname(filePath)}/${path.basename(
-            filePath)}.slice$start-$end${path.extension(filePath)}';
-        List<int> sliceBytes = await file
-            .openRead(start, end)
-            .toList()
-            .then((list) => list.expand((x) => x).toList());
-        await File(slicePath).writeAsBytes(sliceBytes);
-        transcribedText += await processFile(slicePath);
-        start += sliceSize;
-      }
-      return transcribedText;
-    }
-  }
-
-  Future<String> processFile(String filePath) async {
-    final apiKey = dotenv.env['API_KEY'];
-    var url = Uri.https("api.openai.com", "/v1/audio/transcriptions");
-    var request = http.MultipartRequest('POST', url);
-    request.headers.addAll({"Authorization": "Bearer $apiKey"});
-    request.fields['model'] = 'whisper-1';
-    request.fields['language'] = 'ko';
-    request.files.add(await http.MultipartFile.fromPath('file', filePath));
-    try {
-      var response = await request.send();
-      var newResponse = await http.Response.fromStream(response);
-      if (newResponse.statusCode == 200) {
-        var responseData = json.decode(utf8.decode(newResponse.bodyBytes));
-        if (responseData.containsKey('text')) {
-          String transcribedText = responseData['text'];
-          return transcribedText;
-        } else {
-          throw Exception('API response does not contain text.');
-        }
-      } else {
-        throw Exception(
-            'API call failed. Status code: ${newResponse.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Exception during API call: $e');
-    }
-  }
-
-  Future<String> convertM4aToMp3(String inputPath) async {
-    final outputPath = inputPath.replaceAll('.m4a', '.mp3');
-    final flutterFFmpeg = FlutterFFmpeg();
-
-    int result = await flutterFFmpeg.execute(
-        '-y -i "$inputPath" -codec:a libmp3lame -qscale:a 2 "$outputPath"');
-    if (result == 0) {
-      logger.i('Conversion successful');
-      return outputPath;
-    } else {
-      throw Exception('Failed to convert file');
-    }
-  }
-
-  Future<String> convertAacToMp3(String inputPath) async {
-    final outputPath = inputPath.replaceAll('.aac', '.mp3');
-    final flutterFFmpeg = FlutterFFmpeg();
-
-    int result = await flutterFFmpeg.execute(
-        '-y -i "$inputPath" -codec:a libmp3lame -qscale:a 2 "$outputPath"');
-    if (result == 0) {
-      logger.i('Conversion successful');
-      return outputPath;
-    } else {
-      throw Exception('Failed to convert file');
-    }
-  }
-
-  Future<void> requestPermissions() async {
-    var micStatus = await Permission.microphone.status;
-    if (!micStatus.isGranted) {
-      await Permission.microphone.request();
-    }
-
-    var storageStatus = await Permission.storage.status;
-    if (!storageStatus.isGranted) {
-      await Permission.storage.request();
-    }
   }
 
   Future<void> initRecorder() async {
@@ -183,7 +82,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     }
   }
 
-
   Future<void> stopRecording() async {
     if (!_recorder!.isRecording) {
       return;
@@ -221,6 +119,178 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       logger.e('Error stopping the recording: $e');
     }
   }
+
+  // Future<String> convertSpeechToText(String filePath) async {
+  //   const maxFileSize = 25 * 1024 * 1024;
+  //   const sliceSize = 20 * 1024 * 1024;
+  //   final file = File(filePath);
+  //   final fileSize = await file.length();
+  //
+  //   if (fileSize <= maxFileSize) {
+  //     return await processFile(filePath);
+  //   } else {
+  //     String transcribedText = '';
+  //     int start = 0;
+  //     while (start < fileSize) {
+  //       int end = (start + sliceSize < fileSize) ? start + sliceSize : fileSize;
+  //       String slicePath =
+  //           '${path.dirname(filePath)}/${path.basename(
+  //           filePath)}.slice$start-$end${path.extension(filePath)}';
+  //       List<int> sliceBytes = await file
+  //           .openRead(start, end)
+  //           .toList()
+  //           .then((list) => list.expand((x) => x).toList());
+  //       await File(slicePath).writeAsBytes(sliceBytes);
+  //       transcribedText += await processFile(slicePath);
+  //       start += sliceSize;
+  //     }
+  //     return transcribedText;
+  //   }
+  // }
+  //
+  // Future<String> processFile(String filePath) async {
+  //   final apiKey = dotenv.env['API_KEY'];
+  //   var url = Uri.https("api.openai.com", "/v1/audio/transcriptions");
+  //   var request = http.MultipartRequest('POST', url);
+  //   request.headers.addAll({"Authorization": "Bearer $apiKey"});
+  //   request.fields['model'] = 'whisper-1';
+  //   request.fields['language'] = 'ko';
+  //   request.files.add(await http.MultipartFile.fromPath('file', filePath));
+  //   try {
+  //     var response = await request.send();
+  //     var newResponse = await http.Response.fromStream(response);
+  //     if (newResponse.statusCode == 200) {
+  //       var responseData = json.decode(utf8.decode(newResponse.bodyBytes));
+  //       if (responseData.containsKey('text')) {
+  //         String transcribedText = responseData['text'];
+  //         return transcribedText;
+  //       } else {
+  //         throw Exception('API response does not contain text.');
+  //       }
+  //     } else {
+  //       throw Exception(
+  //           'API call failed. Status code: ${newResponse.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Exception during API call: $e');
+  //   }
+  // }
+  //
+  // Future<String> convertM4aToMp3(String inputPath) async {
+  //   final outputPath = inputPath.replaceAll('.m4a', '.mp3');
+  //   final flutterFFmpeg = FlutterFFmpeg();
+  //
+  //   int result = await flutterFFmpeg.execute(
+  //       '-y -i "$inputPath" -codec:a libmp3lame -qscale:a 2 "$outputPath"');
+  //   if (result == 0) {
+  //     logger.i('Conversion successful');
+  //     return outputPath;
+  //   } else {
+  //     throw Exception('Failed to convert file');
+  //   }
+  // }
+  //
+  // Future<String> convertAacToMp3(String inputPath) async {
+  //   final outputPath = inputPath.replaceAll('.aac', '.mp3');
+  //   final flutterFFmpeg = FlutterFFmpeg();
+  //
+  //   int result = await flutterFFmpeg.execute(
+  //       '-y -i "$inputPath" -codec:a libmp3lame -qscale:a 2 "$outputPath"');
+  //   if (result == 0) {
+  //     logger.i('Conversion successful');
+  //     return outputPath;
+  //   } else {
+  //     throw Exception('Failed to convert file');
+  //   }
+  // }
+  //
+  // Future<void> requestPermissions() async {
+  //   var micStatus = await Permission.microphone.status;
+  //   if (!micStatus.isGranted) {
+  //     await Permission.microphone.request();
+  //   }
+  //
+  //   var storageStatus = await Permission.storage.status;
+  //   if (!storageStatus.isGranted) {
+  //     await Permission.storage.request();
+  //   }
+  // }
+  //
+  // Future<void> initRecorder() async {
+  //   try {
+  //     await _recorder!.openRecorder();
+  //     _isRecorderInitialized = true;
+  //     _recorder!.setSubscriptionDuration(const Duration(milliseconds: 500));
+  //   } catch (e) {
+  //     logger.e('녹음기 초기화 중 오류 발생: $e');
+  //     _isRecorderInitialized = false;
+  //   }
+  // }
+  //
+  // Future<void> startRecording() async {
+  //   if (!_isRecorderInitialized || _recorder!.isRecording) {
+  //     logger.w('Recorder not initialized or already recording.');
+  //     return;
+  //   }
+  //   try {
+  //     _elapsedTimeInSeconds = 0; // 타이머 초기화
+  //     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+  //       setState(() {
+  //         _elapsedTimeInSeconds++;
+  //       });
+  //     });
+  //     Directory tempDir = await getTemporaryDirectory();
+  //     _recordedFilePath = '${tempDir.path}/flutter_sound_tmp.aac';
+  //     await _recorder!.startRecorder(toFile: _recordedFilePath);
+  //     setState(() {
+  //       _isRecording = true;
+  //     });
+  //   } catch (e) {
+  //     logger.e('Recording start error: $e');
+  //     setState(() {
+  //       _isRecording = false;
+  //     });
+  //   }
+  // }
+  //
+  //
+  // Future<void> stopRecording() async {
+  //   if (!_recorder!.isRecording) {
+  //     return;
+  //   }
+  //   try {
+  //     _timer.cancel();
+  //     String? path = await _recorder!.stopRecorder();
+  //     setState(() {
+  //       context.read<TasksBloc>().add(StartProcessing());
+  //     });
+  //     if (path == null) {
+  //       return;
+  //     }
+  //     setState(() {
+  //       _isRecording = false;
+  //     });
+  //     try {
+  //       String mp3Path = await convertAacToMp3(path);
+  //       _recordedFilePath = mp3Path;
+  //       try {
+  //         String transcribedText = await convertSpeechToText(mp3Path);
+  //         widget.taskModel.transcribedTexts = transcribedText;
+  //         setState(() {
+  //           context
+  //               .read<TasksBloc>()
+  //               .add(UploadVoiceFile(taskModel: widget.taskModel));
+  //         });
+  //       } catch (e) {
+  //         logger.e('Error converting speech to text: $e');
+  //       }
+  //     } catch (e) {
+  //       logger.e('Error during AAC to MP3 conversion: $e');
+  //     }
+  //   } catch (e) {
+  //     logger.e('Error stopping the recording: $e');
+  //   }
+  // }
 
   @override
   void dispose() {

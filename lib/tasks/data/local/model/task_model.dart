@@ -26,34 +26,6 @@ class TaskModel {
     this.quizTexts,
   });
 
-  TaskModel copyWith({
-    String? id,
-    String? title,
-    String? description,
-    DateTime? makeDateTime,
-    // DateTime? startDateTime,
-    // DateTime? stopDateTime,
-    bool? completed,
-    String? transcribedTexts,
-    List<String>? splitTranscribedTextsByContext,
-    List<String>? summaryTexts,
-    List<String>? quizTexts,
-  }) {
-    return TaskModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      makeDateTime: makeDateTime ?? this.makeDateTime,
-      // startDateTime: startDateTime ?? this.startDateTime,
-      // stopDateTime: stopDateTime ?? this.stopDateTime,
-      completed: completed ?? this.completed,
-      transcribedTexts: transcribedTexts ?? this.transcribedTexts,
-      splitTranscribedTextsByContext: splitTranscribedTextsByContext ?? this.splitTranscribedTextsByContext,
-      summaryTexts: summaryTexts ?? this.summaryTexts,
-      quizTexts: quizTexts ?? this.quizTexts,
-    );
-  }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
