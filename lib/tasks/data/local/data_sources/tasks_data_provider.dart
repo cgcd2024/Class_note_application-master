@@ -193,8 +193,6 @@ class TaskDataProvider {
         'max_tokens': 300,
       }),
     );
-    logger.i('openai response: '
-        '${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -224,8 +222,6 @@ class TaskDataProvider {
         // 'max_tokens': 50, // Adjust the summary length as needed
       }),
     );
-    logger.i('openai response: '
-        '${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -239,7 +235,6 @@ class TaskDataProvider {
   // TODO 통짜 스트링 문맥별로 나누는 것
   Future<List<String>> _splitTranscribedTextByContext(String text) async {
     List<String> splitHalfList=_splitTextHalf(text);
-    logger.v(splitHalfList);
 
     List<String> splitByContextList =
     await Future.wait(splitHalfList.map((myString) async {
@@ -255,7 +250,7 @@ class TaskDataProvider {
 // TODO 스트링 반갈
   List<String> _splitTextHalf(String text){
     List<String> result=[];
-    var tempIndex=text.lastIndexOf('. ',(text.length/2).toInt());
+    var tempIndex=text.lastIndexOf('. ',text.length~/2);
     result.add(text.substring(0,tempIndex+2));
     result.add(text.substring(tempIndex+2));
     return result;
@@ -281,8 +276,6 @@ class TaskDataProvider {
         // 'max_tokens': 50, // Adjust the summary length as needed
       }),
     );
-    logger.i('openai response: '
-        '${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));

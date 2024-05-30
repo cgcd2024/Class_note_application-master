@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 
 class ChatBubbles extends StatelessWidget {
-  const ChatBubbles(this.message, this.isMe, this.userName, {Key? key}) : super(key: key);
+  const ChatBubbles(this.message, this.isMe, this.userName, {Key? key})
+      : super(key: key);
 
   final String message;
   final String userName;
@@ -15,21 +16,23 @@ class ChatBubbles extends StatelessWidget {
       children: [
         if (isMe)
           Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
+              padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
               child: ChatBubble(
                 clipper: ChatBubbleClipper6(type: BubbleType.sendBubble),
                 alignment: Alignment.topRight,
-                margin: EdgeInsets.only(top: 20),
+                margin: const EdgeInsets.only(top: 20),
                 backGroundColor: Colors.blue,
                 child: Container(
                     constraints: BoxConstraints(
                       maxWidth: MediaQuery.of(context).size.width * 0.7,
                     ),
                     child: Column(
-                      crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                      crossAxisAlignment: isMe
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
                       children: [
-                        Text(
-                            "사용자",
+                        const Text(
+                          "사용자",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -37,39 +40,42 @@ class ChatBubbles extends StatelessWidget {
                         ),
                         Text(
                           message,
-                          style: TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ],
                     )),
               )),
         if (!isMe)
           Padding(
-              padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
               child: ChatBubble(
                 clipper: ChatBubbleClipper6(type: BubbleType.receiverBubble),
-                backGroundColor: Color(0xffE7E7ED),
-                margin: EdgeInsets.only(top: 20),
+                backGroundColor: const Color(0xffE7E7ED),
+                margin: const EdgeInsets.only(top: 20),
                 child: Container(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.7,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "GPT",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.7,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: isMe
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "GPT",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                      Text(
-                        message,
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ],
-                  )
-                ),
+                        message == "Blorfendip"
+                            ? CircularProgressIndicator()
+                            : Text(
+                                message,
+                                style: const TextStyle(color: Colors.black),
+                              ),
+                      ],
+                    )),
               )),
       ],
     );

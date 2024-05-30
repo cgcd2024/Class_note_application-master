@@ -32,7 +32,6 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     emit(TasksLoading());
     try {
       final processedTasks = await taskRepository.processTasks(event.taskModel);
-      logger.wtf(processedTasks);
       final updatedProcessedTasks = await taskRepository.updateTask(processedTasks);
       return emit(VoiceFileUploaded(processedTasks: updatedProcessedTasks));
     } catch (exception) {

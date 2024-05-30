@@ -21,6 +21,7 @@ class NewMessage extends StatefulWidget {
 class _NewMessageState extends State<NewMessage> {
   final _controller=TextEditingController();
   var _userEnterMessage='';
+  var loading='Blorfendip';
   bool isWait=false;
 
   void _sendMessage() async{
@@ -32,26 +33,35 @@ class _NewMessageState extends State<NewMessage> {
     _controller.clear();
     widget.processedTasks.summaryTexts?.add("user@$_userEnterMessage");
     widget.streamController.sink.add(widget.processedTasks.summaryTexts!.length);
-    widget.processedTasks.summaryTexts?.add("gpt@${await _askTasks(input: _userEnterMessage)}");
-    widget.streamController.sink.add(widget.processedTasks.summaryTexts!.length);
+
+
+    widget.processedTasks.summaryTexts?.add("gpt@$loading");
+    var nowLength=widget.processedTasks.summaryTexts!.length;
+    widget.streamController.sink.add(nowLength);
+
+
+    // Logger().wtf("[${nowLength-1}] : ${widget.processedTasks.summaryTexts?[nowLength-1]}");
+    widget.processedTasks.summaryTexts?[nowLength-1] = "gpt@${await _askTasks(input: _userEnterMessage)}";
+    // Logger().wtf("[${nowLength-1}] : ${widget.processedTasks.summaryTexts?[nowLength-1]}");
+    widget.streamController.sink.add(nowLength);
 
     isWait=false;
-    logger.i(widget.processedTasks.summaryTexts);
+    // logger.i(widget.processedTasks.summaryTexts);
   }
 
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top:8),
-      padding: EdgeInsets.all(8),
+      margin: const EdgeInsets.only(top:8),
+      padding: const EdgeInsets.all(8),
       child: Row(
         children: [
           Expanded(
               child: TextField(
                 maxLines: null,
                 controller: _controller,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Send a Message...'
                 ),
                 onChanged: (value){
@@ -63,7 +73,7 @@ class _NewMessageState extends State<NewMessage> {
           ),
           IconButton(
               onPressed: isWait ? null : _sendMessage,
-              icon: Icon(Icons.send),
+              icon: const Icon(Icons.send),
               color: Colors.blue,
           )
         ],
@@ -89,8 +99,6 @@ class _NewMessageState extends State<NewMessage> {
         ],
       }),
     );
-    logger.i('openai response: '
-        '${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));

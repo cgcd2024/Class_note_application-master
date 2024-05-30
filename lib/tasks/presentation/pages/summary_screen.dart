@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:class_note/tasks/presentation/pages/summary_screen_chat/message.dart';
 import 'package:class_note/tasks/presentation/pages/summary_screen_chat/new_message.dart';
@@ -43,7 +42,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
     // taskModel.summaryTexts = sentences;
 
     return Scaffold(
-      body: Container(
+      body: Center(
         child: Column(
           children: [
             Expanded(
@@ -103,9 +102,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
             color: Colors.white,
             child: Container(
               padding: const EdgeInsets.all(12.0),
-              child: Text(
+              child: const Text(
                   '요약문 설명',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     color: Colors.black87
                   ),
