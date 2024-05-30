@@ -36,6 +36,8 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   String? _recordedFilePath;
   int _selectedIndex = 0;
   late PageController _pageController;
+  late Timer _timer;
+  int _elapsedTimeInSeconds = 0;
 
   @override
   void initState() {
@@ -62,7 +64,8 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       while (start < fileSize) {
         int end = (start + sliceSize < fileSize) ? start + sliceSize : fileSize;
         String slicePath =
-            '${path.dirname(filePath)}/${path.basename(filePath)}.slice$start-$end${path.extension(filePath)}';
+            '${path.dirname(filePath)}/${path.basename(
+            filePath)}.slice$start-$end${path.extension(filePath)}';
         List<int> sliceBytes = await file
             .openRead(start, end)
             .toList()
@@ -160,6 +163,12 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       return;
     }
     try {
+      _elapsedTimeInSeconds = 0; // 타이머 초기화
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          _elapsedTimeInSeconds++;
+        });
+      });
       Directory tempDir = await getTemporaryDirectory();
       _recordedFilePath = '${tempDir.path}/flutter_sound_tmp.aac';
       await _recorder!.startRecorder(toFile: _recordedFilePath);
@@ -174,11 +183,13 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     }
   }
 
+
   Future<void> stopRecording() async {
     if (!_recorder!.isRecording) {
       return;
     }
     try {
+      _timer.cancel();
       String? path = await _recorder!.stopRecorder();
       setState(() {
         context.read<TasksBloc>().add(StartProcessing());
@@ -194,7 +205,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         _recordedFilePath = mp3Path;
         try {
           String transcribedText = await convertSpeechToText(mp3Path);
-          //String updatedTranscribedTexts = '${widget.taskModel.transcribedTexts}\n$transcribedText'.trim();
           widget.taskModel.transcribedTexts = transcribedText;
           setState(() {
             context
@@ -217,6 +227,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     _recorder!.closeRecorder();
     _recorder = null;
     _pageController.dispose();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -230,12 +241,18 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     _pageController.jumpToPage(index);
   }
 
+  String _formatElapsedTime(int seconds) {
+    int hours = seconds ~/ 3600;
+    int minutes = (seconds % 3600) ~/ 60;
+    int remainingSeconds = seconds % 60;
+    return '${hours.toString().padLeft(2, '0')}H : ${minutes.toString().padLeft(2, '0')}M :${remainingSeconds.toString().padLeft(2, '0')}S';
+  }
+
   @override
   Widget build(BuildContext context) {
     final taskModel = widget.taskModel;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(''),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -296,18 +313,23 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     );
   }
 
-
   Widget _buildInitialUI() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Text("수업명 : ${widget.taskModel.title}"),
-        const SizedBox(height: 20),
+        Text(
+          widget.taskModel.title,
+          style: TextStyle(
+            color: Colors.blueGrey.shade800,
+            fontSize: 24.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 40),
         ElevatedButton(
           onPressed: _isRecording ? stopRecording : startRecording,
           style: ElevatedButton.styleFrom(
             shape: const CircleBorder(),
-            backgroundColor: _isRecording ? Colors.red : Colors.white,
             minimumSize: const Size(200, 200),
             padding: const EdgeInsets.all(20),
           ),
@@ -317,9 +339,16 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 20),
-        Text(_isRecording ? "녹음중입니다" : "녹음중이 아닙니다"),
-        const SizedBox(height: 20),
+        const SizedBox(height: 40),
+        Text(
+          _isRecording ? _formatElapsedTime(_elapsedTimeInSeconds) : "녹음중이 아닙니다",
+          style: TextStyle(
+            color: Colors.blueGrey.shade600,
+            fontSize: 18.0,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 40),
         ElevatedButton(
           onPressed: () async {
             FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -348,31 +377,70 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
               logger.e('파일을 선택하지 않았습니다.');
             }
           },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            textStyle: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            elevation: 2,
+          ),
           child: const Text('Upload'),
         ),
-        const SizedBox(height: 20),
       ],
     );
   }
 
   Widget _buildLoadingUI() {
-    return const Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        CircularProgressIndicator(),
-        SizedBox(height: 20),
-        Text('번역 생성중...!!'),
-      ],
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+          ),
+          SizedBox(height: 20),
+          Text(
+            '번역 생성중...!!',
+            style: TextStyle(
+              color: Colors.black45,
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildUploadedUI() {
-    return const Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text('summary 와 quiz 탭에서 유용한 정보를 받아보세요!'),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.info_outline,
+            color: Colors.lightBlue,
+            size: 40.0,
+          ),
+          SizedBox(height: 10),
+          Text(
+            '수업 관련 요약과 퀴즈가 생성되었습니다',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.blueGrey,
+              fontSize: 18.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
-

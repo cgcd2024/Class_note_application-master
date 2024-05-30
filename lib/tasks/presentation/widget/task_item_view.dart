@@ -92,7 +92,7 @@ class _TaskItemViewState extends State<TaskItemView> {
                                     width: 10,
                                   ),
                                   buildText(
-                                      'Edit task',
+                                      '수업 수정하기',
                                       kBlackColor,
                                       textMedium,
                                       FontWeight.normal,
@@ -113,7 +113,7 @@ class _TaskItemViewState extends State<TaskItemView> {
                                     width: 10,
                                   ),
                                   buildText(
-                                      'Delete task',
+                                      '수업 삭제하기',
                                       kRed,
                                       textMedium,
                                       FontWeight.normal,
