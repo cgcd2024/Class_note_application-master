@@ -159,7 +159,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
       logger.w('Recorder not initialized or already recording.');
       return;
     }
-
     try {
       Directory tempDir = await getTemporaryDirectory();
       _recordedFilePath = '${tempDir.path}/flutter_sound_tmp.aac';
@@ -181,6 +180,9 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
     }
     try {
       String? path = await _recorder!.stopRecorder();
+      setState(() {
+        context.read<TasksBloc>().add(StartProcessing());
+      });
       if (path == null) {
         return;
       }
@@ -192,20 +194,12 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
         _recordedFilePath = mp3Path;
         try {
           String transcribedText = await convertSpeechToText(mp3Path);
-          String updatedTranscribedTexts =
-              '${widget.taskModel.transcribedTexts}\n$transcribedText'.trim();
-          TaskModel updatedTaskModel = widget.taskModel
-              .copyWith(transcribedTexts: updatedTranscribedTexts);
+          //String updatedTranscribedTexts = '${widget.taskModel.transcribedTexts}\n$transcribedText'.trim();
+          widget.taskModel.transcribedTexts = transcribedText;
           setState(() {
             context
                 .read<TasksBloc>()
-                .add(UploadVoiceFile(taskModel: updatedTaskModel));
-            context
-                .read<TasksBloc>()
-                .add(UpdateTaskEvent(taskModel: updatedTaskModel));
-          });
-          setState(() {
-            text = transcribedText;
+                .add(UploadVoiceFile(taskModel: widget.taskModel));
           });
         } catch (e) {
           logger.e('Error converting speech to text: $e');
@@ -239,8 +233,6 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
   @override
   Widget build(BuildContext context) {
     final taskModel = widget.taskModel;
-    var id = widget.taskModel.id;
-    logger.e(id);
     return Scaffold(
       appBar: AppBar(
         title: const Text(''),
@@ -270,8 +262,7 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
                   return _buildLoadingUI();
                 } else if (state is VoiceFileUploaded) {
                   return _buildUploadedUI();
-                }
-                else {
+                } else {
                   return _buildUploadedUI();
                 }
               },
@@ -344,11 +335,11 @@ class _UploadVoiceScreenState extends State<UploadVoiceScreen> {
               }
               try {
                 String transcribedText = await convertSpeechToText(filePath);
-                TaskModel updatedTaskModel = widget.taskModel.copyWith(transcribedTexts: transcribedText);
+                widget.taskModel.transcribedTexts = transcribedText;
                 setState(() {
                   context
                       .read<TasksBloc>()
-                      .add(UploadVoiceFile(taskModel: updatedTaskModel));
+                      .add(UploadVoiceFile(taskModel: widget.taskModel));
                 });
               } catch (e) {
                 logger.e('음성을 텍스트로 변환하는 중 오류가 발생했습니다: $e');

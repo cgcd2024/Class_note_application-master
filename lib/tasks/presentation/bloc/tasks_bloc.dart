@@ -20,12 +20,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     on<SearchTaskEvent>(_searchTasks);
     on<UploadVoiceFile>(_uploadVoiceFile);
     on<StartProcessing>(_startProcessing);
-    // on<SuccessProcess>(_successProcess);
   }
-
-  // _successProcess(SuccessProcess event, Emitter<TasksState> emit) async {
-  //   return emit(ProcessSuccessed());
-  // }
 
   _startProcessing(StartProcessing event, Emitter<TasksState> emit) async {
     return emit(ProcessLoading());
@@ -36,11 +31,8 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     emit(TasksLoading());
     try {
       final processedTasks = await taskRepository.processTasks(event.taskModel);
-      print(event.taskModel.id);
-      //Todo processedTasks to Taskmodel
+      print(processedTasks);
       final updatedProcessedTasks = await taskRepository.updateTask(processedTasks);
-      print (updatedProcessedTasks);
-      print(updatedProcessedTasks.runtimeType);
       return emit(VoiceFileUploaded(processedTasks: updatedProcessedTasks));
     } catch (exception) {
       emit(VoiceFileUploadFailure(exception.toString()));

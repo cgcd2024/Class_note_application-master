@@ -33,7 +33,6 @@ class UpdateTaskFailure extends TasksState {
   UpdateTaskFailure({required this.error});
 }
 
-
 class UpdateTaskSuccess extends TasksState {}
 
 class VoiceFileUploaded extends TasksState {
