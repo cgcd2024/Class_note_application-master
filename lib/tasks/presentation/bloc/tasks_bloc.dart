@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/local/data_sources/tasks_data_provider.dart';
 import '../../data/local/model/task_model.dart';
 import '../../data/repository/task_repository.dart';
 

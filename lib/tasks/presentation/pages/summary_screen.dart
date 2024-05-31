@@ -4,7 +4,6 @@ import 'package:class_note/tasks/presentation/pages/summary_screen_chat/new_mess
 import '../../data/local/model/task_model.dart';
 import 'dart:async';
 
-
 class SummaryScreen extends StatefulWidget {
   final TaskModel processedTasks;
 
@@ -41,37 +40,54 @@ class _SummaryScreenState extends State<SummaryScreen> {
     // TODO 실제 동작할 때에는 이 코드 제거
     // taskModel.summaryTexts = sentences;
 
+    //TODO summarytext가 null일때 화면 추가
+
     return Scaffold(
-      body: Center(
-        child: Column(
-          children: [
-            Expanded(
-                child: Message(processedTasks: taskModel, streamController: streamController,)
+        body: Center(
+      child: (taskModel.summaryTexts == null || taskModel.summaryTexts!.isEmpty)
+          ? const Text(
+              '녹음파일을 업로드 해주세요!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 18.0,
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          : Column(
+              children: [
+                Expanded(
+                    child: Message(
+                  processedTasks: taskModel,
+                  streamController: streamController,
+                )),
+                NewMessage(
+                  processedTasks: taskModel,
+                  streamController: streamController,
+                ),
+              ],
             ),
-            NewMessage(processedTasks: taskModel,streamController: streamController,),
-          ],
-        ),
-      )
-      // Center(
-      //   child: (taskModel.summaryTexts == null ||
-      //       taskModel.summaryTexts!.isEmpty)
-      //       ? const Text('생성중')
-      //       : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      //     Expanded(
-      //         child: ListView.builder(
-      //             itemCount: sentences.length,
-      //             itemBuilder: (context, index) {
-      //               return chatBubble(context,sentences[index]);
-      //             }
-      //         )
-      //     )
-      //   ]
-      //   ),
-      // ),
-    );
+    )
+        // Center(
+        //   child: (taskModel.summaryTexts == null ||
+        //       taskModel.summaryTexts!.isEmpty)
+        //       ? const Text('생성중')
+        //       : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        //     Expanded(
+        //         child: ListView.builder(
+        //             itemCount: sentences.length,
+        //             itemBuilder: (context, index) {
+        //               return chatBubble(context,sentences[index]);
+        //             }
+        //         )
+        //     )
+        //   ]
+        //   ),
+        // ),
+        );
   }
 
-  Widget summaryText(BuildContext context,String sentence) {
+  Widget summaryText(BuildContext context, String sentence) {
     return Column(
       children: <Widget>[
         Padding(
@@ -83,12 +99,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 child: ExpansionTile(
                   shape: const Border(),
                   title: Text(sentence),
-                  children: <Widget>[
-                    summaryTextDescribe()
-                  ],
-                )
-            )
-        ),
+                  children: <Widget>[summaryTextDescribe()],
+                ))),
         const Divider(),
       ],
     );
@@ -96,21 +108,17 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
   Widget summaryTextDescribe() {
     return Container(
-          width: double.infinity,
-          margin: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-          child: Card(
-            color: Colors.white,
-            child: Container(
-              padding: const EdgeInsets.all(12.0),
-              child: const Text(
-                  '요약문 설명',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87
-                  ),
-              ),
+        width: double.infinity,
+        margin: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+        child: Card(
+          color: Colors.white,
+          child: Container(
+            padding: const EdgeInsets.all(12.0),
+            child: const Text(
+              '요약문 설명',
+              style: TextStyle(fontSize: 16, color: Colors.black87),
             ),
-          )
-    );
+          ),
+        ));
   }
 }

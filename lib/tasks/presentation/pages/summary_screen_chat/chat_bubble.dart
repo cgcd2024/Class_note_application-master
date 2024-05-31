@@ -69,7 +69,11 @@ class ChatBubbles extends StatelessWidget {
                           ),
                         ),
                         message == "Blorfendip"
-                            ? CircularProgressIndicator()
+                            ? const Padding(
+                                padding:
+                                    EdgeInsets.all(10.0),
+                                child: CircularProgressIndicator(),
+                              )
                             : Text(
                                 message,
                                 style: const TextStyle(color: Colors.black),

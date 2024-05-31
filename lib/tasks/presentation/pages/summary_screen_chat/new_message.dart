@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:class_note/tasks/data/local/model/task_model.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import '../../bloc/tasks_bloc.dart';
+
 
 var logger=Logger();
 
@@ -23,6 +27,7 @@ class _NewMessageState extends State<NewMessage> {
   var _userEnterMessage='';
   var loading='Blorfendip';
   bool isWait=false;
+
 
   void _sendMessage() async{
     if(_userEnterMessage.trim().isEmpty){
@@ -45,6 +50,12 @@ class _NewMessageState extends State<NewMessage> {
     // Logger().wtf("[${nowLength-1}] : ${widget.processedTasks.summaryTexts?[nowLength-1]}");
     widget.streamController.sink.add(nowLength);
 
+    setState(() {
+      context
+          .read<TasksBloc>()
+          .add(UpdateTaskEvent(taskModel: widget.processedTasks));
+    });
+    logger.wtf(widget.processedTasks);
     isWait=false;
     // logger.i(widget.processedTasks.summaryTexts);
   }

@@ -16,6 +16,8 @@ class Message extends StatelessWidget{
     return StreamBuilder(
         initialData: processedTasks.summaryTexts!.length,
         stream: streamController.stream,
+
+        //todo ? delete
         builder: (context, text){
           if(processedTasks.summaryTexts==null){
             return const Center(
