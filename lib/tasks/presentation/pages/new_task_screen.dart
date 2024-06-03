@@ -54,12 +54,9 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
             appBar: const CustomAppBar(
               title: '시간표 생성하기',
             ),
-            body: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => FocusScope.of(context).unfocus(),
-                child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: BlocConsumer<TasksBloc, TasksState>(
+            body: Padding(
+              padding: const EdgeInsets.all(30),
+                    child:  BlocConsumer<TasksBloc, TasksState>(
                         listener: (context, state) {
                           if (state is AddTaskFailure) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -211,12 +208,12 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                                           .millisecondsSinceEpoch
                                           .toString();
                                       var taskModel = TaskModel(
-                                          id: taskId,
-                                          title: title.text,
-                                          description: description.text,
-                                          makeDateTime: DateTime.now(),
-                                          // startDateTime: _rangeStart,
-                                          // stopDateTime: _rangeEnd
+                                        id: taskId,
+                                        title: title.text,
+                                        description: description.text,
+                                        makeDateTime: DateTime.now(),
+                                        // startDateTime: _rangeStart,
+                                        // stopDateTime: _rangeEnd
                                       );
                                       context.read<TasksBloc>().add(
                                           AddNewTaskEvent(
@@ -237,6 +234,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                           )
                         ],
                       );
-                    })))));
+                    })))
+        );
   }
 }

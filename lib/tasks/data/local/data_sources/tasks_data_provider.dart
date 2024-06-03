@@ -162,7 +162,7 @@ class TaskDataProvider {
     // summary to quiz 코드
     taskModel.quizTexts = await Future.wait(
         taskModel.splitTranscribedTextsByContext!.map((myString) async {
-      return await _quizTasks(input: myString);
+      return await _multipleChoiceTasks(input: myString);
     }).toList());
 
     // prefeb에 저장하는 코드
@@ -170,39 +170,39 @@ class TaskDataProvider {
     return taskModel;
   }
 
-  Future<String> _quizTasks({required String input}) async {
-    final apiKey = dotenv.env['API_KEY'];
-    const endpoint = 'https://api.openai.com/v1/chat/completions';
-
-    final response = await http.post(
-      Uri.parse(endpoint),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode({
-        'model': 'gpt-3.5-turbo',
-        "messages": [
-          {
-            "role": "system",
-            "content":
-                "너는 user가 보낸 글의 내용을 기반으로 주관식 문제를 만들어내는 봇이야. 문제를 만들고 해답을 알려 줘."
-          },
-          {"role": "assistant", "content": "문제 : \n해답 : \n"},
-          {"role": "user", "content": input}
-        ],
-        'max_tokens': 300,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-      final quiz = decoded['choices'][0]['message']['content'] as String;
-      return quiz;
-    } else {
-      throw Exception('Failed to summarize text');
-    }
-  }
+  // Future<String> _quizTasks({required String input}) async {
+  //   final apiKey = dotenv.env['API_KEY'];
+  //   const endpoint = 'https://api.openai.com/v1/chat/completions';
+  //
+  //   final response = await http.post(
+  //     Uri.parse(endpoint),
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Authorization': 'Bearer $apiKey',
+  //     },
+  //     body: jsonEncode({
+  //       'model': 'gpt-3.5-turbo',
+  //       "messages": [
+  //         {
+  //           "role": "system",
+  //           "content":
+  //               "너는 user가 보낸 글의 내용을 기반으로 주관식 문제를 만들어내는 봇이야. 문제를 만들고 해답을 알려 줘."
+  //         },
+  //         {"role": "assistant", "content": "문제 : \n해답 : \n"},
+  //         {"role": "user", "content": input}
+  //       ],
+  //       'max_tokens': 300,
+  //     }),
+  //   );
+  //
+  //   if (response.statusCode == 200) {
+  //     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+  //     final quiz = decoded['choices'][0]['message']['content'] as String;
+  //     return quiz;
+  //   } else {
+  //     throw Exception('Failed to summarize text');
+  //   }
+  // }
 
   //객관식
   Future<String> _multipleChoiceTasks({required String input}) async {
@@ -221,13 +221,9 @@ class TaskDataProvider {
           {
             "role": "system",
             "content":
-                "너는 user가 보낸 글의 내용을 4-multiple choice 문제를 만들어내는 봇이야. assistant에 없는 개행문자를 추가하지 말아 줘."
+                "너는 user가 보낸 글의 내용을 기반으로 1,2,3,4 보기가 있는 객관식 문제를 만들어내는 봇이야. 문제를 만들고 해답을 번호로 알려줘"
           },
-          {
-            "role": "assistant",
-            "content":
-                "문제 : 다음 중 가장 큰 행성은?\n1. 목성\n2. 지구\n3. 화성\n4. 천왕성\n해답 : 1. 목성"
-          },
+          {"role": "assistant", "content": "문제 : \n해답 : \n"},
           {"role": "user", "content": input}
         ],
         'max_tokens': 1000,

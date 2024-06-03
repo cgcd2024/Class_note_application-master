@@ -32,7 +32,7 @@ class ChatBubbles extends StatelessWidget {
                           : CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "사용자",
+                          "학생",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -62,7 +62,7 @@ class ChatBubbles extends StatelessWidget {
                           : CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "GPT",
+                          "클래스도우미",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
@@ -70,10 +70,9 @@ class ChatBubbles extends StatelessWidget {
                         ),
                         message == "Blorfendip"
                             ? const Padding(
-                                padding:
-                                    EdgeInsets.all(10.0),
-                                child: CircularProgressIndicator(),
-                              )
+                                padding:  EdgeInsets.fromLTRB(
+                                    15.0, 10.0, 10.0, 10.0),
+                                child: CircularProgressIndicator())
                             : Text(
                                 message,
                                 style: const TextStyle(color: Colors.black),
